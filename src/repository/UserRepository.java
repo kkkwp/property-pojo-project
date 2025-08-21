@@ -5,10 +5,16 @@ import java.util.Map;
 import java.util.Optional;
 
 import domain.User;
+import domain.enums.Role;
 
 public class UserRepository {
 	private static final Map<String, User> users = new HashMap<>();
 	private static long sequence = 0L;
+
+	static {
+		User user1 = new User(++sequence, "test@test", Role.LESSOR);
+		users.put(user1.getEmail(), user1);
+	}
 
 	/**
 	 * 이메일로 사용자를 조회
