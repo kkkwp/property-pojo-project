@@ -1,4 +1,3 @@
-// src/service/IContractManager.java
 public interface IContractManager {
     ContractRequest createRequest(User user, String propertyId);
     boolean approveRequest(User user, String id);
