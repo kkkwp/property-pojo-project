@@ -46,7 +46,7 @@ public class User {
 	 * 사용자가 임차인인지 확인하는 메서드
 	 * @return 임차인이면 true, 그렇지 않으면 false
 	 */
-	public boolean isTenant() {
-		return this.role == Role.USER;
+	public boolean isLessee() {
+		return this.role == Role.LESSEE;
 	}
 }

@@ -17,8 +17,8 @@ public class UserRepository {
 		users.put(lessor.getEmail(), lessor);
 		
 		// 임차인 테스트 데이터
-		User tenant = new User(++sequence, "tenant@test", Role.USER);
-		users.put(tenant.getEmail(), tenant);
+		User lessee = new User(++sequence, "lessee@test", Role.LESSEE);
+		users.put(lessee.getEmail(), lessee);
 	}
 
 	/**

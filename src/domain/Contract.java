@@ -11,15 +11,14 @@ public class Contract {
     private final User requester;
     private final ContractRequest request;
     
-    public Contract(String id, String contractDate, String moveInDate, 
-                   ContractStatus status, Property property, User requester, ContractRequest request) {
+    public Contract(String id, String contractDate, String moveInDate, ContractRequest request) {
         this.id = id;
         this.contractDate = contractDate;
         this.moveInDate = moveInDate;
-        this.status = status;
-        this.property = property;
-        this.requester = requester;
+        this.status = ContractStatus.PENDING;  // 계약 진행 중 상태로 시작
         this.request = request;
+        this.property = request.getProperty();
+        this.requester = request.getRequester();
     }
     
     // Getter 메서드들
@@ -90,5 +89,31 @@ public class Contract {
         }
         
         System.out.println("계약이 취소되었습니다: " + this.id);
+    }
+    
+    // 상태 확인 메서드들
+    public boolean isPending() {
+        return this.status == ContractStatus.PENDING;
+    }
+    
+    public boolean isCompleted() {
+        return this.status == ContractStatus.COMPLETED;
+    }
+    
+    public boolean isCancelled() {
+        return this.status == ContractStatus.CANCELLED;
+    }
+    
+    @Override
+    public String toString() {
+        return "Contract{" +
+            "id='" + id + '\'' +
+            ", contractDate='" + contractDate + '\'' +
+            ", moveInDate='" + moveInDate + '\'' +
+            ", status=" + status +
+            ", property=" + property +
+            ", requester=" + requester +
+            ", request=" + request +
+            '}';
     }
 }

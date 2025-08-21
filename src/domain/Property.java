@@ -7,12 +7,16 @@ public class Property {
     private final String id;
     private final User owner;
     private final PropertyType type;
+    private final String location;  // 지역 (시/군/구)
+    private final int price;        // 가격 (월세)
     private PropertyStatus status;
     
-    public Property(String id, User owner, PropertyType type, PropertyStatus status) {
+    public Property(String id, User owner, PropertyType type, String location, int price, PropertyStatus status) {
         this.id = id;
         this.owner = owner;
         this.type = type;
+        this.location = location;
+        this.price = price;
         this.status = status;
     }
     
@@ -27,6 +31,14 @@ public class Property {
     
     public PropertyType getType() {
         return type;
+    }
+    
+    public String getLocation() {
+        return location;
+    }
+    
+    public int getPrice() {
+        return price;
     }
     
     public PropertyStatus getStatus() {
@@ -66,6 +78,13 @@ public class Property {
     
     @Override
     public String toString() {
-        return "Property[id=" + id + ", type=" + type + ", status=" + status + "]";
+        return "Property{" +
+            "id='" + id + '\'' +
+            ", owner=" + owner +
+            ", type=" + type +
+            ", location='" + location + '\'' +
+            ", price=" + price +
+            ", status=" + status +
+            '}';
     }
 }
