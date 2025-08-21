@@ -12,8 +12,13 @@ public class UserRepository {
 	private static long sequence = 0L;
 
 	static {
-		User user1 = new User(++sequence, "test@test", Role.LESSOR);
-		users.put(user1.getEmail(), user1);
+		// 임대인 테스트 데이터
+		User lessor = new User(++sequence, "lessor@test", Role.LESSOR);
+		users.put(lessor.getEmail(), lessor);
+		
+		// 임차인 테스트 데이터
+		User tenant = new User(++sequence, "tenant@test", Role.USER);
+		users.put(tenant.getEmail(), tenant);
 	}
 
 	/**
