@@ -34,7 +34,7 @@ public class ContractRequestRepository {
     
     public List<ContractRequest> findByPropertyOwner(User owner) {
         return requests.values().stream()
-            .filter(request -> request.getProperty().getOwner().equals(owner))
+            .filter(request -> request.getProperty().getOwnerId().equals(owner.getId()))
             .collect(Collectors.toList());
     }
     

@@ -58,6 +58,32 @@ public class Property {
 		this.status = status;
 	}
 
+	// 상태 변경 메서드들
+	public void markAsAvailable() {
+		this.status = PropertyStatus.AVAILABLE;
+	}
+
+	public void markAsInContract() {
+		this.status = PropertyStatus.IN_CONTRACT;
+	}
+
+	public void markAsCompleted() {
+		this.status = PropertyStatus.COMPLETED;
+	}
+
+	// 비즈니스 로직 메서드들
+	public boolean isAvailable() {
+		return this.status == PropertyStatus.AVAILABLE;
+	}
+
+	public boolean isInContract() {
+		return this.status == PropertyStatus.IN_CONTRACT;
+	}
+
+	public boolean isCompleted() {
+		return this.status == PropertyStatus.COMPLETED;
+	}
+
 	@Override
 	public String toString() {
 		return String.format("매물번호: %d | 집 유형: %s | 위치: %s | 가격: [%s] | 상태: %s",

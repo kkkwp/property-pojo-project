@@ -1,12 +1,9 @@
 import repository.UserRepository;
 import repository.PropertyRepository;
 import repository.ContractRequestRepository;
-import service.AuthService;
-import service.IAuthService;
-import service.PropertyManager;
-import service.IPropertyManager;
-import service.ContractManager;
-import service.IContractManager;
+import service.*;
+import service.PropertyService;
+import service.IPropertyService;
 import view.MainView;
 
 public class Main {
@@ -18,11 +15,11 @@ public class Main {
 		
 		// Service 생성
 		IAuthService authService = new AuthService(userRepository);
-		IPropertyManager propertyManager = new PropertyManager(propertyRepository);
+		IPropertyService propertyService = new PropertyService(propertyRepository, userRepository, null); // validator는 null로
 		IContractManager contractManager = new ContractManager(contractRequestRepository, propertyRepository);
 		
 		// View 생성 및 시작
-		MainView mainView = new MainView(authService, propertyManager, contractManager);
+		MainView mainView = new MainView(authService, propertyService, contractManager);
 		mainView.start();
 	}
 }

@@ -29,8 +29,9 @@ public class ContractManager implements IContractManager {
             throw new IllegalArgumentException("임차인만 계약 요청을 할 수 있습니다.");
         }
         
-        // 2. 매물 조회
-        Optional<Property> propertyOptional = propertyRepository.findById(propertyId);
+        // 2. 매물 조회 (String을 Long으로 변환)
+        Long propertyIdLong = Long.parseLong(propertyId);
+        Optional<Property> propertyOptional = propertyRepository.findById(propertyIdLong);
         if (propertyOptional.isEmpty()) {
             throw new IllegalArgumentException("존재하지 않는 매물입니다.");
         }
@@ -78,8 +79,9 @@ public class ContractManager implements IContractManager {
             throw new IllegalStateException("승인할 수 없는 요청 상태입니다.");
         }
         
-        // 4. 매물 소유자 확인
-        if (!request.getProperty().getOwner().equals(lessor)) {
+        // 4. 매물 소유자 확인 (ownerId로 비교)
+        
+        if (!request.getProperty().getOwnerId().equals(lessor.getId())) {
             throw new IllegalArgumentException("자신의 매물에 대한 요청만 승인할 수 있습니다.");
         }
         
@@ -111,8 +113,8 @@ public class ContractManager implements IContractManager {
             throw new IllegalStateException("거절할 수 없는 요청 상태입니다.");
         }
         
-        // 4. 매물 소유자 확인
-        if (!request.getProperty().getOwner().equals(lessor)) {
+        // 4. 매물 소유자 확인 (ownerId로 비교)
+        if (!request.getProperty().getOwnerId().equals(lessor.getId())) {
             throw new IllegalArgumentException("자신의 매물에 대한 요청만 거절할 수 있습니다.");
         }
         

@@ -22,8 +22,27 @@ bin/
 /nbdist/
 /.nb-gradle/
 
-### VS Code ###
+# Cursor/VS Code
 .vscode/
+*.code-workspace
+
+# Compiled class files
+*.class
+
+# Build directories
+out/
+target/
+build/
+bin/
+
+# Java
+*.jar
+*.war
+*.ear
+
+# IDE
+.idea/
+*.iml
 
 ### IntelliJ ###
 .idea/

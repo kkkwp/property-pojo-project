@@ -10,21 +10,21 @@ import domain.ContractRequest;
 import domain.enums.Role;
 import domain.enums.RequestStatus;
 import service.IAuthService;
-import service.IPropertyManager;
+import service.IPropertyService;
 import service.IContractManager;
 import repository.ContractRequestRepository;
 
 public class MainView {
     private final Scanner scanner;
     private final IAuthService authService;
-    private final IPropertyManager propertyManager;
+    private final IPropertyService propertyService;
     private final IContractManager contractManager;
     private final ContractRequestRepository contractRequestRepository;
 
-    public MainView(IAuthService authService, IPropertyManager propertyManager, IContractManager contractManager) {
+    public MainView(IAuthService authService, IPropertyService propertyService, IContractManager contractManager) {
         this.scanner = new Scanner(System.in);
         this.authService = authService;
-        this.propertyManager = propertyManager;
+        this.propertyService = propertyService;
         this.contractManager = contractManager;
         this.contractRequestRepository = new ContractRequestRepository(); // 임시로 직접 생성
     }
@@ -189,9 +189,9 @@ public class MainView {
         
         System.out.println("📋 매물 정보:");
         System.out.println("   - 매물 ID: " + property.getId());
-        System.out.println("   - 매물 유형: " + property.getType());
+        System.out.println("   - 매물 유형: " + property.getPropertyType());
         System.out.println("   - 지역: " + property.getLocation());
-        System.out.println("   - 가격: " + String.format("%,d원", property.getPrice()));
+        System.out.println("   - 가격: " + property.getPrice());
         System.out.println("   - 상태: " + property.getStatus());
         
         System.out.println("\n👤 신청자 정보:");
@@ -263,7 +263,7 @@ public class MainView {
             System.out.println("❌ 숫자를 입력해주세요.");
         }
     }
-    
+
     // 매물 등록
     private void createProperty(User lessor) {
         System.out.println("\n=== 매물 등록 ===");
@@ -278,8 +278,9 @@ public class MainView {
         int price = Integer.parseInt(scanner.nextLine());
         
         try {
-            Property property = propertyManager.createProperty(lessor, propertyType, location, price);
-            System.out.println("매물이 등록되었습니다: " + property.getId());
+            // TODO: PropertyCreateRequest 객체를 생성하여 propertyService.createProperty 호출
+            // 현재 구조에 맞게 수정 필요
+            System.out.println("매물 등록 기능은 현재 구조에 맞게 수정이 필요합니다.");
         } catch (IllegalArgumentException e) {
             System.out.println("오류: " + e.getMessage());
         }
