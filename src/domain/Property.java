@@ -58,6 +58,21 @@ public class Property {
 		this.status = status;
 	}
 
+	// 거래 유형 변경 (가격도 함께 변경해야 함)
+	public void setDealType(DealType dealType) {
+		// 이 메서드는 실제로는 새로운 Property 객체를 생성해야 하지만,
+		// 현재 구조에서는 final 필드이므로 임시로 처리
+		// 실제로는 Property를 immutable하게 유지하는 것이 좋음
+		throw new UnsupportedOperationException("거래 유형 변경은 새로운 매물 등록을 통해 처리해주세요.");
+	}
+
+	// 가격 변경
+	public void setPrice(Price price) {
+		// 이 메서드도 실제로는 새로운 Property 객체를 생성해야 하지만,
+		// 현재 구조에서는 final 필드이므로 임시로 처리
+		throw new UnsupportedOperationException("가격 변경은 새로운 매물 등록을 통해 처리해주세요.");
+	}
+
     // 상태 변경 메서드들
 	public void markAsAvailable() {
 		this.status = PropertyStatus.AVAILABLE;

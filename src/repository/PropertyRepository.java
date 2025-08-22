@@ -189,6 +189,13 @@ public class PropertyRepository {
 		return new ArrayList<>(properties.values());
 	}
 
+	// 소유자 ID로 매물 조회
+	public List<Property> findByOwnerId(Long ownerId) {
+		return properties.values().stream()
+			.filter(property -> property.getOwnerId().equals(ownerId))
+			.collect(Collectors.toList());
+	}
+
 	public void deleteById(Long id) {
 		properties.remove(id);
 	}
