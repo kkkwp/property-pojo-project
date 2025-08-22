@@ -19,7 +19,7 @@ public class Main {
 		IContractManager contractManager = new ContractManager(contractRequestRepository, propertyRepository);
 		
 		// View 생성 및 시작
-		MainView mainView = new MainView(authService, propertyService, contractManager);
+		MainView mainView = new MainView(authService, propertyService, contractManager, propertyRepository, contractRequestRepository);
 		mainView.start();
 	}
 }
