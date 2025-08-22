@@ -1,6 +1,7 @@
 package domain;
 
 import domain.enums.Role;
+import java.util.Objects;
 
 public class User {
 	private final Long id;
@@ -32,6 +33,22 @@ public class User {
 			", email='" + email + '\'' +
 			", role=" + role +
 			'}';
+	}
+
+	/**
+	 * ID를 기준으로 User 객체를 비교
+	 */
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		User user = (User) o;
+		return Objects.equals(id, user.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(id);
 	}
 
 	/**
