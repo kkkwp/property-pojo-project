@@ -30,10 +30,8 @@ bin/
 *.class
 
 # Build directories
-out/
 target/
 build/
-bin/
 
 # Java
 *.jar
@@ -41,10 +39,6 @@ bin/
 *.ear
 
 # IDE
-.idea/
-*.iml
-
-### IntelliJ ###
 .idea/
 *.iml
 
