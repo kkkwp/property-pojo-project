@@ -1,6 +1,5 @@
 package repository;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,17 +79,6 @@ public class PropertyRepository {
 		return properties.values().stream()
 			.filter(property -> property.getOwnerId().equals(owner.getId()))
 			.collect(Collectors.toList());
-	}
-
-	// 거래 가능한 매물만 반환
-	public List<Property> findAvailableProperties(PropertyStatus status) {
-		return properties.values().stream()
-			.filter(property -> property.getStatus().equals(PropertyStatus.AVAILABLE))
-			.collect(Collectors.toList());
-	}
-
-	public List<Property> findAll() {
-		return new ArrayList<>(properties.values());
 	}
 
 	public void deleteById(Long id) {

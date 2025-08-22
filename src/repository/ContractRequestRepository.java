@@ -1,78 +1,60 @@
 package repository;
 
-import domain.ContractRequest;
-import domain.User;
-import domain.Property;
-import domain.enums.RequestStatus;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
+import domain.ContractRequest;
+import domain.enums.RequestStatus;
+
+// TODO: 특정 임대인이 받은 모든 요청 목록 조회 구현
 public class ContractRequestRepository {
-    private final Map<String, ContractRequest> requests = new HashMap<>();
-    
-    public ContractRequest save(ContractRequest request) {
-        requests.put(request.getId(), request);
-        return request;
-    }
-    
-    public Optional<ContractRequest> findById(String id) {
-        return Optional.ofNullable(requests.get(id));
-    }
-    
-    public List<ContractRequest> findByRequester(User requester) {
-        return requests.values().stream()
-            .filter(request -> request.getRequester().equals(requester))
-            .collect(Collectors.toList());
-    }
-    
-    public List<ContractRequest> findByProperty(Property property) {
-        return requests.values().stream()
-            .filter(request -> request.getProperty().equals(property))
-            .collect(Collectors.toList());
-    }
-    
-    public List<ContractRequest> findByPropertyOwner(User owner) {
-        return requests.values().stream()
-            .filter(request -> request.getProperty().getOwner().equals(owner))
-            .collect(Collectors.toList());
-    }
-    
-    public List<ContractRequest> findByStatus(RequestStatus status) {
-        return requests.values().stream()
-            .filter(request -> request.getStatus() == status)
-            .collect(Collectors.toList());
-    }
-    
-    public List<ContractRequest> findPendingRequests() {
-        return findByStatus(RequestStatus.REQUESTED);
-    }
-    
-    public List<ContractRequest> findApprovedRequests() {
-        return findByStatus(RequestStatus.APPROVED);
-    }
-    
-    public List<ContractRequest> findRejectedRequests() {
-        return findByStatus(RequestStatus.REJECTED);
-    }
-    
-    public List<ContractRequest> findAll() {
-        return new ArrayList<>(requests.values());
-    }
-    
-    public boolean deleteById(String id) {
-        return requests.remove(id) != null;
-    }
-    
-    public boolean existsById(String id) {
-        return requests.containsKey(id);
-    }
-    
-    public long count() {
-        return requests.size();
-    }
-    
-    public void deleteAll() {
-        requests.clear();
-    }
+	private static final Map<Long, ContractRequest> requests = new HashMap<>();
+	private static long sequence = 0L;
+
+	public ContractRequest save(ContractRequest request) {
+		if (request.getId() == null) {
+			long newId = ++sequence;
+			request.setId(newId);
+		}
+		requests.put(request.getId(), request);
+		return request;
+	}
+
+	// 요청 ID로 특정 요청을 조회
+	public Optional<ContractRequest> findById(Long id) {
+		return Optional.ofNullable(requests.get(id));
+	}
+
+	// 특정 사용자가 요청한 모든 요청 목록 조회
+	public List<ContractRequest> findAllByRequesterId(Long userId) {
+		return requests.values().stream()
+			.filter(request -> request.getRequesterId().equals(userId))
+			.collect(Collectors.toList());
+	}
+
+	// 특정 매물에 대한 모든 요청 목록 조회
+	public List<ContractRequest> findAllByPropertyId(Long propertyId) {
+		return requests.values().stream()
+			.filter(request -> request.getPropertyId().equals(propertyId))
+			.collect(Collectors.toList());
+	}
+
+	// 상태별 요청 목록 조회
+	public List<ContractRequest> findByStatus(RequestStatus status) {
+		return requests.values().stream()
+			.filter(request -> request.getStatus().equals(status))
+			.collect(Collectors.toList());
+	}
+
+	public List<ContractRequest> findAll() {
+		return new ArrayList<>(requests.values());
+	}
+
+	public void deleteAll() {
+		requests.clear();
+	}
 } 
