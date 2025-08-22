@@ -58,7 +58,7 @@ public class Property {
 		this.status = status;
 	}
 
-	// 상태 변경 메서드들
+    // 상태 변경 메서드들
 	public void markAsAvailable() {
 		this.status = PropertyStatus.AVAILABLE;
 	}
