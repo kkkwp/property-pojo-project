@@ -1,3 +1,9 @@
+import java.util.List;
+import java.util.Optional;
+
+import domain.ContractRequest;
+import domain.Property;
+import domain.User;
 import repository.ContractRequestRepository;
 import repository.PropertyRepository;
 import repository.UserRepository;
@@ -10,12 +16,6 @@ import service.PropertyService;
 import validator.ContractValidator;
 import validator.PropertyValidator;
 import view.MainView;
-
-import java.util.List;
-import java.util.Optional;
-import domain.User;
-import domain.Property;
-import domain.ContractRequest;
 
 public class Main {
 	public static void main(String[] args) {
@@ -31,18 +31,21 @@ public class Main {
 		// Service 생성
 		IAuthService authService = new AuthService(userRepository);
 		IPropertyService propertyService = new PropertyService(propertyRepository, userRepository, propertyValidator);
-		IContractService contractService= new ContractService(contractRequestRepository, propertyRepository, contractValidator);
+		IContractService contractService = new ContractService(contractRequestRepository, propertyRepository,
+			contractValidator);
 
 		// 기본 계약 요청 데이터 생성 (테스트용)
 		createSampleContractRequests(userRepository, propertyRepository, contractRequestRepository);
 
 		// 메인 뷰 시작
-		MainView mainView = new MainView(authService, propertyService, contractService);
+		MainView mainView = new MainView(authService, propertyService, contractService, propertyRepository,
+			contractRequestRepository);
 		mainView.start();
 	}
 
 	// 기본 계약 요청 데이터 생성
-	private static void createSampleContractRequests(UserRepository userRepository, PropertyRepository propertyRepository, ContractRequestRepository contractRequestRepository) {
+	private static void createSampleContractRequests(UserRepository userRepository,
+		PropertyRepository propertyRepository, ContractRequestRepository contractRequestRepository) {
 		// 사용자 가져오기
 		Optional<User> lesseeOpt = userRepository.findByEmail("lessee@test");
 		Optional<User> lessorOpt = userRepository.findByEmail("lessor@test");
