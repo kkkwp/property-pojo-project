@@ -1,9 +1,4 @@
-import java.util.List;
-import java.util.Optional;
-
-import domain.ContractRequest;
-import domain.Property;
-import domain.User;
+import config.DataInitializer;
 import repository.ContractRequestRepository;
 import repository.PropertyRepository;
 import repository.UserRepository;
@@ -34,39 +29,14 @@ public class Main {
 		IContractService contractService = new ContractService(contractRequestRepository, propertyRepository,
 			contractValidator);
 
-		// 기본 계약 요청 데이터 생성 (테스트용)
-		createSampleContractRequests(userRepository, propertyRepository, contractRequestRepository);
+		// 데이터 초기화
+		DataInitializer dataInitializer = new DataInitializer(userRepository, propertyRepository,
+			contractRequestRepository);
+		dataInitializer.init();
 
 		// 메인 뷰 시작
 		MainView mainView = new MainView(authService, propertyService, contractService, propertyRepository,
 			contractRequestRepository);
 		mainView.start();
-	}
-
-	// 기본 계약 요청 데이터 생성
-	private static void createSampleContractRequests(UserRepository userRepository,
-		PropertyRepository propertyRepository, ContractRequestRepository contractRequestRepository) {
-		// 사용자 가져오기
-		Optional<User> lesseeOpt = userRepository.findByEmail("lessee@test");
-		Optional<User> lessorOpt = userRepository.findByEmail("lessor@test");
-
-		if (lesseeOpt.isPresent() && lessorOpt.isPresent()) {
-			User lessee = lesseeOpt.get();
-			User lessor = lessorOpt.get();
-
-			// 매물 가져오기
-			List<Property> properties = propertyRepository.findAll();
-			if (!properties.isEmpty()) {
-				Property property = properties.get(0); // 첫 번째 매물 사용
-
-				// 계약 요청 생성
-				ContractRequest contractRequest = new ContractRequest(
-					null,
-					lessee.getId(),
-					property.getId()
-				);
-				contractRequestRepository.save(contractRequest);
-			}
-		}
 	}
 }

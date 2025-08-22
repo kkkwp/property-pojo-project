@@ -5,20 +5,17 @@ import java.util.Map;
 import java.util.Optional;
 
 import domain.User;
-import domain.enums.Role;
 
 public class UserRepository {
 	private static final Map<String, User> users = new HashMap<>();
 	private static long sequence = 0L;
 
-	static {
-		// 임대인 테스트 데이터
-		User lessor = new User(++sequence, "lessor@test", Role.LESSOR);
-		users.put(lessor.getEmail(), lessor);
-		
-		// 임차인 테스트 데이터
-		User lessee = new User(++sequence, "lessee@test", Role.LESSEE);
-		users.put(lessee.getEmail(), lessee);
+	// 회원 가입 (데이터 초기화에 사용)
+	public User save(User user) {
+		if (user.getId() == null)
+			user = new User(++sequence, user.getEmail(), user.getRole());
+		users.put(user.getEmail(), user);
+		return user;
 	}
 
 	/**
