@@ -1,7 +1,6 @@
 package service;
 
 import java.util.List;
-import java.util.Optional;
 
 import domain.Property;
 import domain.User;
@@ -17,8 +16,11 @@ public interface IPropertyService {
 	 */
 	List<Property> findPropertiesByFilter(PropertyFilter filters);
 
-	// ID로 매물 조회
-	Optional<Property> findPropertyById(Long propertyId);
+	// 매물 ID로 매물 조회
+	Property findPropertyById(Long propertyId);
+
+	// 소유주 ID로 매물 조회
+	List<Property> findPropertiesByUserId(Long userId);
 
 	/**
 	 * 새로운 매물을 등록합니다.

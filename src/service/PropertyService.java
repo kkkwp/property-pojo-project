@@ -1,7 +1,6 @@
 package service;
 
 import java.util.List;
-import java.util.Optional;
 
 import domain.Property;
 import domain.User;
@@ -31,8 +30,14 @@ public class PropertyService implements IPropertyService {
 	}
 
 	@Override
-	public Optional<Property> findPropertyById(Long propertyId) {
-		return propertyRepository.findById(propertyId);
+	public Property findPropertyById(Long propertyId) {
+		return propertyRepository.findById(propertyId)
+			.orElseThrow(() -> new CustomException(ErrorCode.PROPERTY_NOT_FOUND));
+	}
+
+	@Override
+	public List<Property> findPropertiesByUserId(Long userId) {
+		return propertyRepository.findByOwnerId(userId);
 	}
 
 	@Override

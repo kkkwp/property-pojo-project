@@ -12,22 +12,23 @@ import domain.enums.DealType;
 import domain.enums.PropertyStatus;
 import domain.enums.PropertyType;
 import domain.enums.RequestStatus;
-import repository.ContractRequestRepository;
-import repository.PropertyRepository;
+import dto.PropertyCreateRequest;
+import exception.CustomException;
+import service.IContractService;
+import service.IPropertyService;
 import view.ui.UIHelper;
 
 public class LessorView {
 	private final Scanner scanner;
 	private final User lessor;
-	private final PropertyRepository propertyRepository;
-	private final ContractRequestRepository contractRequestRepository;
+	private final IPropertyService propertyService;
+	private final IContractService contractService;
 
-	public LessorView(Scanner scanner, User lessor, PropertyRepository propertyRepository,
-		ContractRequestRepository contractRequestRepository) {
+	public LessorView(Scanner scanner, User lessor, IPropertyService propertyService, IContractService contractService) {
 		this.scanner = scanner;
 		this.lessor = lessor;
-		this.propertyRepository = propertyRepository;
-		this.contractRequestRepository = contractRequestRepository;
+		this.propertyService = propertyService;
+		this.contractService = contractService;
 	}
 
 	public void showMenu() {
@@ -131,16 +132,13 @@ public class LessorView {
 		if (price == null)
 			return;
 
-		Property newProperty = new Property(
-			System.currentTimeMillis(),
-			lessor.getId(),
+		PropertyCreateRequest request = new PropertyCreateRequest(
 			location,
 			price,
 			propertyType,
 			dealType
 		);
-
-		propertyRepository.save(newProperty);
+		propertyService.createProperty(lessor, request);
 
 		UIHelper.clearScreen();
 		UIHelper.printHeader("부동산 플랫폼");
@@ -332,7 +330,7 @@ public class LessorView {
 		UIHelper.clearScreen();
 		UIHelper.printHeader("부동산 플랫폼");
 
-		List<Property> myProperties = propertyRepository.findByOwnerId(lessor.getId());
+		List<Property> myProperties = propertyService.findPropertiesByUserId(lessor.getId());
 
 		if (myProperties.isEmpty()) {
 			String content = "내 매물 조회\n\n" +
@@ -429,7 +427,7 @@ public class LessorView {
 		UIHelper.clearScreen();
 		UIHelper.printHeader("부동산 플랫폼");
 
-		List<Property> myProperties = propertyRepository.findByOwnerId(lessor.getId());
+		List<Property> myProperties = propertyService.findPropertiesByUserId(lessor.getId());
 
 		if (myProperties.isEmpty()) {
 			String content = "매물 수정\n\n" +
@@ -668,7 +666,7 @@ public class LessorView {
 		UIHelper.clearScreen();
 		UIHelper.printHeader("부동산 플랫폼");
 
-		List<Property> myProperties = propertyRepository.findByOwnerId(lessor.getId());
+		List<Property> myProperties = propertyService.findPropertiesByUserId(lessor.getId());
 
 		if (myProperties.isEmpty()) {
 			String content = "매물 삭제\n\n" +
@@ -725,7 +723,7 @@ public class LessorView {
 
 				String confirm = scanner.nextLine().trim().toLowerCase();
 				if (confirm.equals("y")) {
-					propertyRepository.deleteById(propertyToDelete.getId());
+					propertyService.deleteProperty(lessor, propertyToDelete.getId());
 
 					UIHelper.clearScreen();
 					UIHelper.printHeader("부동산 플랫폼");
@@ -967,9 +965,12 @@ public class LessorView {
 		UIHelper.clearScreen();
 		UIHelper.printHeader("부동산 플랫폼");
 
-		request.approve();
+		request.setStatus(RequestStatus.APPROVED);
 
-		Property property = request.getProperty();
+
+		Long propertyId = request.getPropertyId();
+		Property property = propertyRepository.findById(propertyId)
+				.orElseThrow(() -> new CustomException())
 		property.setStatus(PropertyStatus.IN_CONTRACT);
 
 		String content = "✅ 계약 요청이 승인되었습니다!\n\n" +
@@ -991,7 +992,7 @@ public class LessorView {
 		UIHelper.clearScreen();
 		UIHelper.printHeader("부동산 플랫폼");
 
-		request.reject();
+		request.setStatus(RequestStatus.REJECTED);
 
 		String content = "❌ 계약 요청이 반려되었습니다.\n\n" +
 			"1: 요청 목록으로 돌아가기\n" +
