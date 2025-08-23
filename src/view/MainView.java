@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
+import config.UIHelper;
 import domain.ContractRequest;
 import domain.Location;
 import domain.Price;
@@ -15,6 +16,7 @@ import domain.enums.PropertyStatus;
 import domain.enums.PropertyType;
 import domain.enums.RequestStatus;
 import domain.enums.Role;
+import dto.PropertyFilter;
 import repository.ContractRequestRepository;
 import repository.PropertyRepository;
 import service.IAuthService;
@@ -22,6 +24,7 @@ import service.IContractService;
 import service.IPropertyService;
 
 public class MainView {
+
 	private final Scanner scanner;
 	private final IAuthService authService;
 	private final IPropertyService propertyService;
@@ -29,8 +32,10 @@ public class MainView {
 	private final ContractRequestRepository contractRequestRepository;
 	private final PropertyRepository propertyRepository;
 
-	public MainView(IAuthService authService, IPropertyService propertyService, IContractService contractService,
-		PropertyRepository propertyRepository, ContractRequestRepository contractRequestRepository) {
+	public MainView(IAuthService authService, IPropertyService propertyService,
+		IContractService contractService,
+		PropertyRepository propertyRepository,
+		ContractRequestRepository contractRequestRepository) {
 		this.scanner = new Scanner(System.in);
 		this.authService = authService;
 		this.propertyService = propertyService;
@@ -39,135 +44,9 @@ public class MainView {
 		this.propertyRepository = propertyRepository;
 	}
 
-	// 화면 클리어 메서드
-	private void clearScreen() {
-		System.out.print("\033[H\033[2J");
-		System.out.flush();
-	}
-
-	// 이미지와 정확히 똑같은 이중선 헤더
-	private void printHeader(String title) {
-		System.out.println("═══════════════════════════════════════════════════════════════════");
-		System.out.println("                          " + title);
-		System.out.println("═══════════════════════════════════════════════════════════════════");
-		System.out.println();
-	}
-
-	// 한글/이모지 길이를 정확히 계산하는 메서드
-	private int getDisplayLength(String str) {
-		if (str == null)
-			return 0;
-		int length = 0;
-		for (int i = 0; i < str.length(); i++) {
-			char c = str.charAt(i);
-			if (c >= 0xAC00 && c <= 0xD7AF) { // 한글
-				length += 2;
-			} else if (c >= 0x1F600 && c <= 0x1F64F) { // 이모지
-				length += 2;
-			} else if (c >= 0x1F300 && c <= 0x1F5FF) { // 기타 이모지
-				length += 2;
-			} else if (c >= 0x2600 && c <= 0x26FF) { // 기타 기호
-				length += 2;
-			} else if (c >= 0x2700 && c <= 0x27BF) { // 장식 기호
-				length += 2;
-			} else {
-				length += 1;
-			}
-		}
-		return length;
-	}
-
-	// 긴 텍스트를 박스 너비에 맞게 줄바꿈하는 메서드
-	private List<String> wrapText(String text, int maxWidth) {
-		List<String> lines = new ArrayList<>();
-		if (text == null || text.isEmpty()) {
-			lines.add("");
-			return lines;
-		}
-
-		String[] words = text.split(" ");
-		StringBuilder currentLine = new StringBuilder();
-
-		for (String word : words) {
-			if (currentLine.length() > 0) {
-				String testLine = currentLine.toString() + " " + word;
-				if (getDisplayLength(testLine) <= maxWidth) {
-					currentLine.append(" ").append(word);
-				} else {
-					lines.add(currentLine.toString());
-					currentLine = new StringBuilder(word);
-				}
-			} else {
-				currentLine.append(word);
-			}
-		}
-
-		if (currentLine.length() > 0) {
-			lines.add(currentLine.toString());
-		}
-
-		return lines;
-	}
-
-	// 이미지와 정확히 똑같은 파란색 테두리 박스 (완벽 버전)
-	private void printBox(String userEmail, String boxTitle, String content) {
-		final int BOX_WIDTH = 65; // 박스 내용 너비
-
-		// 상단 테두리
-		System.out.println("\u001B[36m┌─────────────────────────────────────────────────────────────────┐\u001B[0m");
-
-		// 사용자 환영 메시지 (핑크/연보라색)
-		String welcomeMsg = " 👤 " + userEmail + "님 환영합니다!";
-		int welcomeDisplayLength = getDisplayLength(welcomeMsg);
-		int welcomePadding = BOX_WIDTH - welcomeDisplayLength;
-		System.out.println(
-			"\u001B[36m│\u001B[0m\u001B[35m" + welcomeMsg + "\u001B[0m" + " ".repeat(Math.max(0, welcomePadding))
-				+ "\u001B[36m│\u001B[0m");
-
-		// 박스 제목 (흰색)
-		String titleMsg = " 📋 " + boxTitle;
-		int titleDisplayLength = getDisplayLength(titleMsg);
-		int titlePadding = BOX_WIDTH - titleDisplayLength;
-		System.out.println(
-			"\u001B[36m│\u001B[0m\u001B[37m" + titleMsg + "\u001B[0m" + " ".repeat(Math.max(0, titlePadding))
-				+ "\u001B[36m│\u001B[0m");
-
-		// 중간 구분선
-		System.out.println("\u001B[36m├─────────────────────────────────────────────────────────────────┤\u001B[0m");
-
-		// 내용 출력 (줄바꿈 처리 + 정확한 패딩)
-		String[] contentLines = content.split("\n");
-		for (String line : contentLines) {
-			if (line == null)
-				line = "";
-
-			// 긴 텍스트 줄바꿈 처리
-			List<String> wrappedLines = wrapText(line, BOX_WIDTH - 2); // 좌우 여백 2자 제외
-
-			for (String wrappedLine : wrappedLines) {
-				int lineDisplayLength = getDisplayLength(wrappedLine);
-				int linePadding = BOX_WIDTH - lineDisplayLength;
-
-				// 주의사항 라인인지 확인 (노란색 처리)
-				if (wrappedLine.contains("다중 선택 시:") || wrappedLine.contains("설정하지 않을 경우:") ||
-					wrappedLine.contains("예시:") || wrappedLine.contains("예: 1,2") ||
-					wrappedLine.contains("이전 메뉴로 돌아가려면:")) {
-					System.out.println("\u001B[36m│\u001B[0m \u001B[33m" + wrappedLine + "\u001B[0m" + " ".repeat(
-						Math.max(0, linePadding - 1)) + "\u001B[36m│\u001B[0m");
-				} else {
-					System.out.println("\u001B[36m│\u001B[0m " + wrappedLine + " ".repeat(Math.max(0, linePadding - 1))
-						+ "\u001B[36m│\u001B[0m");
-				}
-			}
-		}
-
-		// 하단 테두리
-		System.out.println("\u001B[36m└─────────────────────────────────────────────────────────────────┘\u001B[0m");
-	}
-
 	public void start() {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		// 박스 없이 바로 환영 문구들 출력
 		System.out.println("🏠 부동산 플랫폼에 오신 것을 환영합니다! 🏠");
@@ -184,14 +63,14 @@ public class MainView {
 		Optional<User> userOptional = authService.login(email);
 		if (userOptional.isPresent()) {
 			User user = userOptional.get();
-			clearScreen();
-			printHeader("부동산 플랫폼");
+			UIHelper.clearScreen();
+			UIHelper.printHeader("부동산 플랫폼");
 
 			String successContent = "✅ 로그인 성공!\n" +
 				"\n" +
 				"환영합니다, " + user.getRole() + "님.";
 
-			printBox(user.getEmail(), "로그인 성공", successContent);
+			UIHelper.printBox(user.getEmail(), "로그인 성공", successContent);
 
 			// 사용자 역할에 따라 다른 메뉴 표시
 			if (user.getRole() == Role.LESSOR) {
@@ -200,8 +79,8 @@ public class MainView {
 				showLesseeMenu(user);
 			}
 		} else {
-			clearScreen();
-			printHeader("부동산 플랫폼");
+			UIHelper.clearScreen();
+			UIHelper.printHeader("부동산 플랫폼");
 
 			// 로그인 실패 시 박스 없이 깔끔하게 표시
 			System.out.println("❌ 로그인 실패!");
@@ -218,8 +97,8 @@ public class MainView {
 	// 임차인 메뉴 (이미지의 예시)
 	private void showLesseeMenu(User lessee) {
 		while (true) {
-			clearScreen();
-			printHeader("부동산 플랫폼");
+			UIHelper.clearScreen();
+			UIHelper.printHeader("부동산 플랫폼");
 
 			String menuContent = "메뉴를 선택하세요:\n" +
 				"\n" +
@@ -227,7 +106,7 @@ public class MainView {
 				"2. 계약 요청 조회\n" +
 				"3. 로그아웃";
 
-			printBox(lessee.getEmail(), "임차인 메뉴", menuContent);
+			UIHelper.printBox(lessee.getEmail(), "임차인 메뉴", menuContent);
 			System.out.print("\u001B[33m선택: \u001B[0m");
 
 			String choice = scanner.nextLine();
@@ -250,12 +129,12 @@ public class MainView {
 
 	// 이미지와 정확히 똑같은 계약 요청 확인 화면
 	private void searchProperties(User lessee) {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		// 매물 검색 필터링 과정
-		String propertyType = selectPropertyType();
-		if (propertyType != null && propertyType.equals("BACK")) {
+		String propertyTypeStr = selectPropertyType();
+		if (propertyTypeStr != null && propertyTypeStr.equals("BACK")) {
 			return; // 이전 메뉴로 돌아가기
 		}
 		String locationStr = selectLocation();
@@ -275,9 +154,58 @@ public class MainView {
 			return; // 이전 메뉴로 돌아가기
 		}
 
+		// PropertyFilter 객체 생성
+		PropertyFilter filter = new PropertyFilter();
+
+		// 매물 유형 설정
+		if (propertyTypeStr != null && !propertyTypeStr.equals("ALL")) {
+			List<PropertyType> propertyTypes = new ArrayList<>();
+			String[] types = propertyTypeStr.split(",");
+			for (String type : types) {
+				try {
+					propertyTypes.add(PropertyType.valueOf(type.trim()));
+				} catch (IllegalArgumentException e) {
+					// 무시
+				}
+			}
+			filter.setPropertyTypes(propertyTypes);
+		}
+
+		// 지역 설정
+		if (locationStr != null && !locationStr.trim().isEmpty()) {
+			String[] parts = locationStr.split(" ", 2);
+			if (parts.length > 0) {
+				filter.setCity(parts[0]);
+			}
+			if (parts.length > 1) {
+				filter.setDistrict(parts[1]);
+			}
+		}
+
+		// 거래 유형 설정
+		if (dealTypeStr != null && !dealTypeStr.equals("ALL")) {
+			List<DealType> dealTypes = new ArrayList<>();
+			String[] types = dealTypeStr.split(",");
+			for (String type : types) {
+				try {
+					dealTypes.add(DealType.valueOf(type.trim()));
+				} catch (IllegalArgumentException e) {
+					// 무시
+				}
+			}
+			filter.setDealTypes(dealTypes);
+		}
+
+		// 가격 설정
+		if (minPrice != null) {
+			filter.setMinPrice(minPrice.longValue());
+		}
+		if (maxPrice != null) {
+			filter.setMaxPrice(maxPrice.longValue());
+		}
+
 		// 매물 검색 실행
-		List<Property> searchResults = searchPropertiesWithFilter(propertyType, locationStr, dealTypeStr, minPrice,
-			maxPrice);
+		List<Property> searchResults = propertyService.searchProperties(filter);
 
 		// 검색 결과 표시
 		showSearchResults(lessee, searchResults);
@@ -285,8 +213,8 @@ public class MainView {
 
 	// 매물 유형 선택
 	private String selectPropertyType() {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		String content = "매물 유형을 선택하세요:\n" +
 			"\n" +
@@ -301,7 +229,7 @@ public class MainView {
 			"설정하지 않을 경우: 엔터를 눌러주세요\n" +
 			"이전 메뉴로 돌아가려면: 0을 눌러주세요";
 
-		printBox("lessee@test", "매물 유형 선택", content);
+		UIHelper.printBox("lessee@test", "매물 유형 선택", content);
 		System.out.print("\u001B[33m선택: \u001B[0m");
 
 		String choice = scanner.nextLine().trim();
@@ -368,8 +296,8 @@ public class MainView {
 		// 대분류 선택
 		String majorRegion;
 		while (true) {
-			clearScreen();
-			printHeader("부동산 플랫폼");
+			UIHelper.clearScreen();
+			UIHelper.printHeader("부동산 플랫폼");
 
 			String regionContent = "매물 검색 - 대분류 지역\n" +
 				"\n" +
@@ -386,7 +314,7 @@ public class MainView {
 				"설정하지 않을 경우: 엔터를 눌러주세요\n" +
 				"이전 메뉴로 돌아가려면: 0을 눌러주세요";
 
-			printBox("lessee@test", "지역 선택", regionContent);
+			UIHelper.printBox("lessee@test", "지역 선택", regionContent);
 			System.out.print("\u001B[33m선택: \u001B[0m");
 
 			String choice = scanner.nextLine().trim();
@@ -442,8 +370,8 @@ public class MainView {
 	// 중분류 선택
 	private String selectMiddleRegion(String majorRegion) {
 		while (true) {
-			clearScreen();
-			printHeader("부동산 플랫폼");
+			UIHelper.clearScreen();
+			UIHelper.printHeader("부동산 플랫폼");
 
 			StringBuilder content = new StringBuilder();
 			content.append("매물 검색 - 중분류 지역\n\n");
@@ -480,7 +408,7 @@ public class MainView {
 			content.append("설정하지 않을 경우: 엔터를 눌러주세요\n" +
 				"이전 메뉴로 돌아가려면: 0을 눌러주세요");
 
-			printBox("lessee@test", "중분류 선택", content.toString());
+			UIHelper.printBox("lessee@test", "중분류 선택", content.toString());
 			System.out.print("\u001B[33m선택: \u001B[0m");
 			String choice = scanner.nextLine().trim();
 
@@ -542,8 +470,8 @@ public class MainView {
 	// 거래 유형 선택
 	private String selectDealType() {
 		while (true) {
-			clearScreen();
-			printHeader("부동산 플랫폼");
+			UIHelper.clearScreen();
+			UIHelper.printHeader("부동산 플랫폼");
 
 			String dealTypeContent = "거래 유형을 선택하세요:\n\n" +
 				"1. 전세 (JEONSE)\n" +
@@ -556,7 +484,7 @@ public class MainView {
 				"설정하지 않을 경우: 엔터를 눌러주세요\n" +
 				"이전 메뉴로 돌아가려면: 0을 눌러주세요";
 
-			printBox("lessee@test", "거래 유형 선택", dealTypeContent);
+			UIHelper.printBox("lessee@test", "거래 유형 선택", dealTypeContent);
 			System.out.print("\u001B[33m선택: \u001B[0m");
 
 			String choice = scanner.nextLine().trim();
@@ -618,8 +546,8 @@ public class MainView {
 
 	// 최소 가격 선택
 	private Integer selectMinPrice() {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		String content = "최소 가격을 입력하세요:\n\n" +
 			"예시: 10000000 (1000만원)\n" +
@@ -627,7 +555,7 @@ public class MainView {
 			"설정하지 않을 경우: 엔터를 눌러주세요\n" +
 			"이전 메뉴로 돌아가려면: 0을 눌러주세요";
 
-		printBox("lessee@test", "최소 가격 설정", content);
+		UIHelper.printBox("lessee@test", "최소 가격 설정", content);
 		System.out.print("\u001B[33m최소 가격 (원): \u001B[0m");
 
 		String input = scanner.nextLine().trim();
@@ -649,8 +577,8 @@ public class MainView {
 
 	// 최대 가격 선택
 	private Integer selectMaxPrice() {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		String content = "최대 가격을 입력하세요:\n\n" +
 			"예시: 50000000 (5000만원)\n" +
@@ -658,7 +586,7 @@ public class MainView {
 			"설정하지 않을 경우: 엔터를 눌러주세요\n" +
 			"이전 메뉴로 돌아가려면: 0을 눌러주세요";
 
-		printBox("lessee@test", "최대 가격 설정", content);
+		UIHelper.printBox("lessee@test", "최대 가격 설정", content);
 		System.out.print("\u001B[33m최대 가격 (원): \u001B[0m");
 
 		String input = scanner.nextLine().trim();
@@ -678,91 +606,16 @@ public class MainView {
 		}
 	}
 
-	// 필터링된 매물 검색
-	private List<Property> searchPropertiesWithFilter(String propertyType, String locationStr, String dealTypeStr,
-		Integer minPrice, Integer maxPrice) {
-		// 실제로는 Repository에서 필터링된 결과를 가져와야 하지만,
-		// 여기서는 테스트 데이터를 반환
-		List<Property> allProperties = propertyRepository.findAll();
-		List<Property> filteredProperties = new ArrayList<>();
-
-		for (Property property : allProperties) {
-			// 매물 유형 필터링 (다중 선택 처리)
-			if (propertyType != null && !propertyType.equals("ALL")) {
-				boolean matchesPropertyType = false;
-				if (propertyType.contains(",")) {
-					// 다중 선택 처리
-					String[] selectedTypes = propertyType.split(",");
-					for (String type : selectedTypes) {
-						if (property.getPropertyType().toString().equals(type.trim())) {
-							matchesPropertyType = true;
-							break;
-						}
-					}
-				} else {
-					// 단일 선택 처리
-					matchesPropertyType = property.getPropertyType().toString().equals(propertyType);
-				}
-
-				if (!matchesPropertyType) {
-					continue;
-				}
-			}
-
-			// 지역 필터링 (null이면 필터링 안함)
-			if (locationStr != null && !locationStr.equals("전체") && !property.getLocation()
-				.toString()
-				.contains(locationStr)) {
-				continue;
-			}
-
-			// 거래 유형 필터링 (다중 선택 처리)
-			if (dealTypeStr != null && !dealTypeStr.equals("ALL")) {
-				boolean matchesDealType = false;
-				if (dealTypeStr.contains(",")) {
-					// 다중 선택 처리
-					String[] selectedTypes = dealTypeStr.split(",");
-					for (String type : selectedTypes) {
-						if (property.getDealType().toString().equals(type.trim())) {
-							matchesDealType = true;
-							break;
-						}
-					}
-				} else {
-					// 단일 선택 처리
-					matchesDealType = property.getDealType().toString().equals(dealTypeStr);
-				}
-
-				if (!matchesDealType) {
-					continue;
-				}
-			}
-
-			// 가격 필터링
-			int propertyPrice = (int)property.getPrice().getDeposit();
-			if (minPrice != null && propertyPrice < minPrice) {
-				continue;
-			}
-			if (maxPrice != null && propertyPrice > maxPrice) {
-				continue;
-			}
-
-			filteredProperties.add(property);
-		}
-
-		return filteredProperties;
-	}
-
 	// 검색 결과 표시
 	private void showSearchResults(User lessee, List<Property> searchResults) {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		if (searchResults.isEmpty()) {
 			String content = "검색 조건에 맞는 매물이 없습니다.\n\n" +
 				"다른 조건으로 다시 검색해보세요.";
 
-			printBox(lessee.getEmail(), "검색 결과", content);
+			UIHelper.printBox(lessee.getEmail(), "검색 결과", content);
 			System.out.print("계속하려면 Enter를 누르세요: ");
 			scanner.nextLine();
 			return;
@@ -786,7 +639,7 @@ public class MainView {
 
 		content.append("계약 요청할 매물을 선택하세요 (번호 입력, 여러 개 선택 가능):");
 
-		printBox(lessee.getEmail(), "검색 결과", content.toString());
+		UIHelper.printBox(lessee.getEmail(), "검색 결과", content.toString());
 		System.out.print("\u001B[33m선택: \u001B[0m");
 
 		String choice = scanner.nextLine();
@@ -797,8 +650,8 @@ public class MainView {
 
 	// 계약 요청 처리
 	private void processContractRequest(User lessee, List<Property> searchResults, String choice) {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		// 선택된 매물들 파싱
 		String[] selectedIndices = choice.split("\\s+");
@@ -817,7 +670,7 @@ public class MainView {
 
 		if (selectedProperties.isEmpty()) {
 			String content = "선택된 매물이 없습니다.";
-			printBox(lessee.getEmail(), "계약 요청", content);
+			UIHelper.printBox(lessee.getEmail(), "계약 요청", content);
 			System.out.print("계속하려면 Enter를 누르세요: ");
 			scanner.nextLine();
 			return;
@@ -839,7 +692,7 @@ public class MainView {
 		content.append("n: 계약 요청 취소\n");
 		content.append("r: 매물 다시 선택하기");
 
-		printBox(lessee.getEmail(), "계약 요청 확인", content.toString());
+		UIHelper.printBox(lessee.getEmail(), "계약 요청 확인", content.toString());
 		System.out.print("\u001B[33m선택: \u001B[0m");
 
 		String confirmChoice = scanner.nextLine().trim().toLowerCase();
@@ -869,8 +722,8 @@ public class MainView {
 			}
 
 			// 계약 요청 완료 화면
-			clearScreen();
-			printHeader("부동산 플랫폼");
+			UIHelper.clearScreen();
+			UIHelper.printHeader("부동산 플랫폼");
 
 			StringBuilder successContent = new StringBuilder();
 			successContent.append("✅ 계약 요청이 성공적으로 제출되었습니다!\n\n");
@@ -879,12 +732,13 @@ public class MainView {
 			for (int i = 0; i < selectedProperties.size(); i++) {
 				Property property = selectedProperties.get(i);
 				successContent.append("   • " + getPropertyTypeDisplayName(property.getPropertyType()) +
-					" - " + property.getLocation().getCity() + " " + property.getLocation().getDistrict() + "\n");
+					" - " + property.getLocation().getCity() + " " + property.getLocation()
+					.getDistrict() + "\n");
 			}
 
 			successContent.append("\n⏰ 임대인의 승인을 기다려주세요!");
 
-			printBox(lessee.getEmail(), "계약 요청 완료", successContent.toString());
+			UIHelper.printBox(lessee.getEmail(), "계약 요청 완료", successContent.toString());
 			System.out.print("계속하려면 Enter를 누르세요: ");
 			scanner.nextLine();
 		} else if (confirmChoice.equals("r")) {
@@ -892,11 +746,11 @@ public class MainView {
 			showSearchResults(lessee, searchResults);
 		} else {
 			// 계약 요청 취소 화면
-			clearScreen();
-			printHeader("부동산 플랫폼");
+			UIHelper.clearScreen();
+			UIHelper.printHeader("부동산 플랫폼");
 
 			String cancelContent = "❌ 계약 요청이 취소되었습니다.";
-			printBox(lessee.getEmail(), "계약 요청 취소", cancelContent);
+			UIHelper.printBox(lessee.getEmail(), "계약 요청 취소", cancelContent);
 			System.out.print("계속하려면 Enter를 누르세요: ");
 			scanner.nextLine();
 		}
@@ -935,7 +789,8 @@ public class MainView {
 	// 가격 정보를 표시용으로 포맷팅
 	private String formatPriceForDisplay(Price price, DealType dealType) {
 		if (dealType == DealType.MONTHLY) {
-			return String.format("보증금: %,d원, 월세: %,d원", price.getDeposit(), price.getMonthlyRent());
+			return String.format("보증금: %,d원, 월세: %,d원", price.getDeposit(),
+				price.getMonthlyRent());
 		} else if (dealType == DealType.JEONSE) {
 			return String.format("전세금: %,d원", price.getDeposit());
 		} else if (dealType == DealType.SALE) {
@@ -962,8 +817,8 @@ public class MainView {
 	// 임대인 메뉴
 	private void showLessorMenu(User lessor) {
 		while (true) {
-			clearScreen();
-			printHeader("부동산 플랫폼");
+			UIHelper.clearScreen();
+			UIHelper.printHeader("부동산 플랫폼");
 
 			String menuContent = "메뉴를 선택하세요:\n" +
 				"\n" +
@@ -971,7 +826,7 @@ public class MainView {
 				"2. 계약 요청 관리\n" +
 				"3. 로그아웃";
 
-			printBox(lessor.getEmail(), "임대인 메뉴", menuContent);
+			UIHelper.printBox(lessor.getEmail(), "임대인 메뉴", menuContent);
 			System.out.print("\u001B[33m선택: \u001B[0m");
 
 			String choice = scanner.nextLine();
@@ -995,8 +850,8 @@ public class MainView {
 	// 매물 관리
 	private void manageProperties(User lessor) {
 		while (true) {
-			clearScreen();
-			printHeader("부동산 플랫폼");
+			UIHelper.clearScreen();
+			UIHelper.printHeader("부동산 플랫폼");
 
 			String content = "매물 관리\n" +
 				"\n" +
@@ -1006,7 +861,7 @@ public class MainView {
 				"4. 매물 삭제\n" +
 				"0. 이전 메뉴로 돌아가기";
 
-			printBox(lessor.getEmail(), "매물 관리", content);
+			UIHelper.printBox(lessor.getEmail(), "매물 관리", content);
 			System.out.print("\u001B[33m선택: \u001B[0m");
 
 			String choice = scanner.nextLine();
@@ -1036,13 +891,13 @@ public class MainView {
 
 	// 매물 등록
 	private void registerProperty(User lessor) {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		String content = "새로운 매물을 등록합니다.\n\n" +
 			"매물 정보를 입력해주세요.";
 
-		printBox(lessor.getEmail(), "매물 등록", content);
+		UIHelper.printBox(lessor.getEmail(), "매물 등록", content);
 
 		// 매물 유형 선택
 		PropertyType propertyType = selectPropertyTypeForRegistration();
@@ -1077,8 +932,8 @@ public class MainView {
 		propertyRepository.save(newProperty);
 
 		// 등록 완료 화면
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		String successContent = "✅ 매물이 성공적으로 등록되었습니다!\n\n" +
 			"📋 등록된 매물 정보:\n\n" +
@@ -1088,15 +943,15 @@ public class MainView {
 			"💵 가격: " + formatPriceForDisplay(price, dealType) + "\n" +
 			"📊 상태: 거래 가능";
 
-		printBox(lessor.getEmail(), "매물 등록 완료", successContent);
+		UIHelper.printBox(lessor.getEmail(), "매물 등록 완료", successContent);
 		System.out.print("시작페이지로 돌아가려면 Enter를 누르세요: ");
 		scanner.nextLine();
 	}
 
 	// 매물 유형 선택 (등록용)
 	private PropertyType selectPropertyTypeForRegistration() {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		String content = "매물 유형을 선택하세요:\n\n" +
 			"1. APARTMENT (아파트)\n" +
@@ -1105,7 +960,7 @@ public class MainView {
 			"4. ONE_ROOM (원룸)\n" +
 			"0. 이전 메뉴로 돌아가기";
 
-		printBox("lessor@test", "매물 유형 선택", content);
+		UIHelper.printBox("lessor@test", "매물 유형 선택", content);
 		System.out.print("\u001B[33m선택: \u001B[0m");
 
 		String choice = scanner.nextLine().trim();
@@ -1131,8 +986,8 @@ public class MainView {
 
 	// 지역 선택 (등록용)
 	private Location selectLocationForRegistration() {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		String content = "매물 위치를 선택하세요:\n\n" +
 			"1. 서울특별시 강남구\n" +
@@ -1142,7 +997,7 @@ public class MainView {
 			"5. 경기도 성남시\n" +
 			"0. 이전 메뉴로 돌아가기";
 
-		printBox("lessor@test", "지역 선택", content);
+		UIHelper.printBox("lessor@test", "지역 선택", content);
 		System.out.print("\u001B[33m선택: \u001B[0m");
 
 		String choice = scanner.nextLine().trim();
@@ -1170,8 +1025,8 @@ public class MainView {
 
 	// 거래 유형 선택 (등록용)
 	private DealType selectDealTypeForRegistration() {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		String content = "거래 유형을 선택하세요:\n\n" +
 			"1. 전세 (JEONSE)\n" +
@@ -1179,7 +1034,7 @@ public class MainView {
 			"3. 매매 (SALE)\n" +
 			"0. 이전 메뉴로 돌아가기";
 
-		printBox("lessor@test", "거래 유형 선택", content);
+		UIHelper.printBox("lessor@test", "거래 유형 선택", content);
 		System.out.print("\u001B[33m선택: \u001B[0m");
 
 		String choice = scanner.nextLine().trim();
@@ -1203,8 +1058,8 @@ public class MainView {
 
 	// 가격 정보 입력 (등록용)
 	private Price inputPriceForRegistration(DealType dealType) {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		String content = "가격 정보를 입력하세요.\n\n";
 
@@ -1221,7 +1076,7 @@ public class MainView {
 
 		content += "\n\n0. 이전 메뉴로 돌아가기";
 
-		printBox("lessor@test", "가격 정보 입력", content);
+		UIHelper.printBox("lessor@test", "가격 정보 입력", content);
 
 		if (dealType == DealType.MONTHLY) {
 			System.out.print("\u001B[33m보증금 (원): \u001B[0m");
@@ -1264,8 +1119,8 @@ public class MainView {
 
 	// 내 매물 조회
 	private void viewMyProperties(User lessor) {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		List<Property> myProperties = propertyRepository.findByOwnerId(lessor.getId());
 
@@ -1274,7 +1129,7 @@ public class MainView {
 				"등록된 매물이 없습니다.\n\n" +
 				"매물 등록에서 새로운 매물을 등록해보세요!";
 
-			printBox(lessor.getEmail(), "내 매물 조회", content);
+			UIHelper.printBox(lessor.getEmail(), "내 매물 조회", content);
 			System.out.print("계속하려면 Enter를 누르세요: ");
 			scanner.nextLine();
 			return;
@@ -1297,7 +1152,7 @@ public class MainView {
 		content.append("\n상세보기를 원하는 매물 번호를 선택하세요.\n");
 		content.append("0: 이전 메뉴로 돌아가기");
 
-		printBox(lessor.getEmail(), "내 매물 조회", content.toString());
+		UIHelper.printBox(lessor.getEmail(), "내 매물 조회", content.toString());
 		System.out.print("\u001B[33m선택: \u001B[0m");
 
 		String choice = scanner.nextLine().trim();
@@ -1323,8 +1178,8 @@ public class MainView {
 	// 매물 상세보기
 	private void showPropertyDetail(User lessor, Property property) {
 		while (true) {
-			clearScreen();
-			printHeader("부동산 플랫폼");
+			UIHelper.clearScreen();
+			UIHelper.printHeader("부동산 플랫폼");
 
 			StringBuilder content = new StringBuilder();
 			content.append("=== 매물 상세 정보 ===\n\n");
@@ -1338,7 +1193,7 @@ public class MainView {
 			content.append("\n1: 매물 목록으로 돌아가기\n");
 			content.append("0: 메인 메뉴로 돌아가기");
 
-			printBox(lessor.getEmail(), "매물 상세보기", content.toString());
+			UIHelper.printBox(lessor.getEmail(), "매물 상세보기", content.toString());
 			System.out.print("\u001B[33m선택: \u001B[0m");
 
 			String choice = scanner.nextLine().trim();
@@ -1360,8 +1215,8 @@ public class MainView {
 
 	// 매물 수정
 	private void updateProperty(User lessor) {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		List<Property> myProperties = propertyRepository.findByOwnerId(lessor.getId());
 
@@ -1370,7 +1225,7 @@ public class MainView {
 				"수정할 매물이 없습니다.\n\n" +
 				"매물 등록에서 새로운 매물을 등록해보세요!";
 
-			printBox(lessor.getEmail(), "매물 수정", content);
+			UIHelper.printBox(lessor.getEmail(), "매물 수정", content);
 			System.out.print("계속하려면 Enter를 누르세요: ");
 			scanner.nextLine();
 			return;
@@ -1391,7 +1246,7 @@ public class MainView {
 
 		content.append("\n0: 이전 메뉴로 돌아가기");
 
-		printBox(lessor.getEmail(), "매물 수정", content.toString());
+		UIHelper.printBox(lessor.getEmail(), "매물 수정", content.toString());
 		System.out.print("\u001B[33m선택: \u001B[0m");
 
 		String choice = scanner.nextLine().trim();
@@ -1416,8 +1271,8 @@ public class MainView {
 
 	// 매물 상세 수정
 	private void updatePropertyDetail(User lessor, Property property) {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		StringBuilder content = new StringBuilder();
 		content.append("=== 매물 상세 정보 ===\n\n");
@@ -1432,7 +1287,7 @@ public class MainView {
 		content.append("2. 가격 변경\n");
 		content.append("0. 이전 메뉴로 돌아가기");
 
-		printBox(lessor.getEmail(), "매물 수정", content.toString());
+		UIHelper.printBox(lessor.getEmail(), "매물 수정", content.toString());
 		System.out.print("\u001B[33m선택: \u001B[0m");
 
 		String choice = scanner.nextLine().trim();
@@ -1456,8 +1311,8 @@ public class MainView {
 
 	// 거래 유형 변경
 	private void updateDealType(User lessor, Property property) {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		StringBuilder content = new StringBuilder();
 		content.append("거래 유형 변경\n\n");
@@ -1468,7 +1323,7 @@ public class MainView {
 		content.append("3. 매매 (SALE)\n");
 		content.append("0. 수정 취소");
 
-		printBox(lessor.getEmail(), "거래 유형 변경", content.toString());
+		UIHelper.printBox(lessor.getEmail(), "거래 유형 변경", content.toString());
 		System.out.print("\u001B[33m선택: \u001B[0m");
 
 		String choice = scanner.nextLine().trim();
@@ -1497,15 +1352,15 @@ public class MainView {
 		property.setDealType(newDealType);
 
 		// 수정 완료
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		String successContent = "✅ 거래 유형이 성공적으로 변경되었습니다!\n\n" +
 			"변경된 거래 유형: " + getDealTypeDisplayName(newDealType) + "\n\n" +
 			"1: 매물 목록으로 돌아가기\n" +
 			"0: 메인 메뉴로 돌아가기";
 
-		printBox(lessor.getEmail(), "거래 유형 변경 완료", successContent);
+		UIHelper.printBox(lessor.getEmail(), "거래 유형 변경 완료", successContent);
 		System.out.print("\u001B[33m선택: \u001B[0m");
 
 		String returnChoice = scanner.nextLine().trim();
@@ -1516,8 +1371,8 @@ public class MainView {
 
 	// 가격 변경
 	private void updatePrice(User lessor, Property property) {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		StringBuilder content = new StringBuilder();
 		content.append("가격 변경\n\n");
@@ -1537,7 +1392,7 @@ public class MainView {
 
 		content.append("\n0: 수정 취소");
 
-		printBox(lessor.getEmail(), "가격 변경", content.toString());
+		UIHelper.printBox(lessor.getEmail(), "가격 변경", content.toString());
 
 		Price newPrice = null;
 
@@ -1583,15 +1438,15 @@ public class MainView {
 		property.setPrice(newPrice);
 
 		// 수정 완료
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		String successContent = "✅ 가격이 성공적으로 변경되었습니다!\n\n" +
 			"변경된 가격: " + formatPriceForDisplay(newPrice, property.getDealType()) + "\n\n" +
 			"1: 매물 목록으로 돌아가기\n" +
 			"0: 메인 메뉴로 돌아가기";
 
-		printBox(lessor.getEmail(), "가격 변경 완료", successContent);
+		UIHelper.printBox(lessor.getEmail(), "가격 변경 완료", successContent);
 		System.out.print("\u001B[33m선택: \u001B[0m");
 
 		String returnChoice = scanner.nextLine().trim();
@@ -1602,8 +1457,8 @@ public class MainView {
 
 	// 매물 삭제
 	private void deleteProperty(User lessor) {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		List<Property> myProperties = propertyRepository.findByOwnerId(lessor.getId());
 
@@ -1611,7 +1466,7 @@ public class MainView {
 			String content = "매물 삭제\n\n" +
 				"삭제할 매물이 없습니다.";
 
-			printBox(lessor.getEmail(), "매물 삭제", content);
+			UIHelper.printBox(lessor.getEmail(), "매물 삭제", content);
 			System.out.print("계속하려면 Enter를 누르세요: ");
 			scanner.nextLine();
 			return;
@@ -1633,7 +1488,7 @@ public class MainView {
 		content.append("\n⚠️ 삭제된 매물은 복구할 수 없습니다.\n");
 		content.append("0: 이전 메뉴로 돌아가기");
 
-		printBox(lessor.getEmail(), "매물 삭제", content.toString());
+		UIHelper.printBox(lessor.getEmail(), "매물 삭제", content.toString());
 		System.out.print("\u001B[33m선택: \u001B[0m");
 
 		String choice = scanner.nextLine().trim();
@@ -1646,8 +1501,8 @@ public class MainView {
 				Property propertyToDelete = myProperties.get(propertyIndex);
 
 				// 삭제 확인
-				clearScreen();
-				printHeader("부동산 플랫폼");
+				UIHelper.clearScreen();
+				UIHelper.printHeader("부동산 플랫폼");
 
 				String confirmContent = "매물 삭제 확인\n\n" +
 					"다음 매물을 삭제하시겠습니까?\n\n" +
@@ -1658,7 +1513,7 @@ public class MainView {
 					"y: 삭제 진행\n" +
 					"n: 삭제 취소";
 
-				printBox(lessor.getEmail(), "삭제 확인", confirmContent);
+				UIHelper.printBox(lessor.getEmail(), "삭제 확인", confirmContent);
 				System.out.print("\u001B[33m선택: \u001B[0m");
 
 				String confirm = scanner.nextLine().trim().toLowerCase();
@@ -1666,13 +1521,13 @@ public class MainView {
 					propertyRepository.deleteById(propertyToDelete.getId());
 
 					// 삭제 완료 메시지와 선택지를 하나의 페이지로 표시
-					clearScreen();
-					printHeader("부동산 플랫폼");
+					UIHelper.clearScreen();
+					UIHelper.printHeader("부동산 플랫폼");
 
 					String successContent = "✅ 매물이 성공적으로 삭제되었습니다!\n\n" +
 						"1: 매물 목록으로 돌아가기\n" +
 						"0: 메인 메뉴로 돌아가기";
-					printBox(lessor.getEmail(), "삭제 완료", successContent);
+					UIHelper.printBox(lessor.getEmail(), "삭제 완료", successContent);
 					System.out.print("\u001B[33m선택: \u001B[0m");
 
 					String returnChoice = scanner.nextLine().trim();
@@ -1695,15 +1550,15 @@ public class MainView {
 	// 계약 요청 관리
 	private void manageContractRequests(User lessor) {
 		while (true) {
-			clearScreen();
-			printHeader("부동산 플랫폼");
+			UIHelper.clearScreen();
+			UIHelper.printHeader("부동산 플랫폼");
 
 			String content = "계약 요청 관리\n" +
 				"\n" +
 				"1. 계약 요청 조회\n" +
 				"0. 이전 메뉴로 돌아가기";
 
-			printBox(lessor.getEmail(), "계약 요청 관리", content);
+			UIHelper.printBox(lessor.getEmail(), "계약 요청 관리", content);
 			System.out.print("\u001B[33m선택: \u001B[0m");
 
 			String choice = scanner.nextLine();
@@ -1724,8 +1579,8 @@ public class MainView {
 
 	// 계약 요청 조회
 	private void viewContractRequests(User lessor) {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		List<ContractRequest> allRequests = contractRequestRepository.findAll();
 
@@ -1734,7 +1589,7 @@ public class MainView {
 				"등록된 계약 요청이 없습니다.\n\n" +
 				"계약 요청을 하면 여기에 표시됩니다.";
 
-			printBox(lessor.getEmail(), "계약 요청 조회", content);
+			UIHelper.printBox(lessor.getEmail(), "계약 요청 조회", content);
 			System.out.print("계속하려면 Enter를 누르세요: ");
 			scanner.nextLine();
 			return;
@@ -1792,7 +1647,7 @@ public class MainView {
 		content.append("\n상세보기를 원하는 요청 번호를 선택하세요.\n");
 		content.append("0: 이전 메뉴로 돌아가기");
 
-		printBox(lessor.getEmail(), "계약 요청 조회", content.toString());
+		UIHelper.printBox(lessor.getEmail(), "계약 요청 조회", content.toString());
 		System.out.print("\u001B[33m선택: \u001B[0m");
 
 		String choice = scanner.nextLine().trim();
@@ -1817,8 +1672,8 @@ public class MainView {
 
 	// 계약 요청 상세보기
 	private void showContractRequestDetail(User lessor, ContractRequest request) {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		Property property = request.getProperty();
 
@@ -1860,7 +1715,7 @@ public class MainView {
 			content.append("0: 메인 메뉴로 돌아가기");
 		}
 
-		printBox(lessor.getEmail(), "계약 요청 상세보기", content.toString());
+		UIHelper.printBox(lessor.getEmail(), "계약 요청 상세보기", content.toString());
 		System.out.print("\u001B[33m선택: \u001B[0m");
 
 		String choice = scanner.nextLine().trim();
@@ -1923,8 +1778,8 @@ public class MainView {
 
 	// 내 계약 요청 조회 (임차인용)
 	private void viewMyContractRequests(User lessee) {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
 		List<ContractRequest> myRequests = contractRequestRepository.findByRequester(lessee);
 
@@ -1933,7 +1788,7 @@ public class MainView {
 				"현재 계약 요청이 없습니다.\n\n" +
 				"매물 조회에서 계약 요청을 해보세요!";
 
-			printBox(lessee.getEmail(), "계약 요청 조회", content);
+			UIHelper.printBox(lessee.getEmail(), "계약 요청 조회", content);
 			System.out.print("계속하려면 Enter를 누르세요: ");
 			scanner.nextLine();
 			return;
@@ -1990,105 +1845,33 @@ public class MainView {
 		content.append("🟡 승인 대기 중: " + pendingCount + "개\n");
 		content.append("\n0: 이전 메뉴로 돌아가기");
 
-		printBox(lessee.getEmail(), "계약 요청 조회", content.toString());
+		UIHelper.printBox(lessee.getEmail(), "계약 요청 조회", content.toString());
 		System.out.print("\u001B[33m선택: \u001B[0m");
 
 		String choice = scanner.nextLine().trim();
 		if (choice.equals("0"))
 			return;
-	}
-
-	// 계약 요청 승인/반려 (임대인용)
-	private void approveRejectRequests(User lessor) {
-		clearScreen();
-		printHeader("부동산 플랫폼");
-
-		String content = "계약 요청 승인/반려 기능\n\n" +
-			"기능 구현 중입니다.";
-
-		printBox(lessor.getEmail(), "계약 요청 승인/반려", content);
-		System.out.print("계속하려면 Enter를 누르세요: ");
-		scanner.nextLine();
-	}
-
-	// 승인/반려 대기 요청 조회
-	private void viewPendingContractRequests(User lessor) {
-		clearScreen();
-		printHeader("부동산 플랫폼");
-
-		List<ContractRequest> pendingRequests = contractRequestRepository.findPendingRequests();
-
-		if (pendingRequests.isEmpty()) {
-			String content = "승인/반려 대기 요청 조회\n\n" +
-				"승인/반려 대기 중인 요청이 없습니다.\n\n" +
-				"모든 요청이 처리되었습니다.";
-
-			printBox(lessor.getEmail(), "승인/반려 대기 요청 조회", content);
-			System.out.print("계속하려면 Enter를 누르세요: ");
-			scanner.nextLine();
-			return;
-		}
-
-		StringBuilder content = new StringBuilder();
-		content.append("승인/반려 대기 요청 목록\n\n");
-
-		for (int i = 0; i < pendingRequests.size(); i++) {
-			ContractRequest request = pendingRequests.get(i);
-			Property property = request.getProperty();
-
-			content.append(String.format("%d. %s %s %s 🟡 승인 대기 중\n",
-				(i + 1),
-				property.getLocation().getCity() + " " + property.getLocation().getDistrict(),
-				getPropertyTypeDisplayName(property.getPropertyType()),
-				getDealTypeDisplayName(property.getDealType())
-			));
-		}
-
-		content.append("\n총 " + pendingRequests.size() + "개의 요청이 승인/반려 대기 중입니다.\n");
-		content.append("\n상세보기를 원하는 요청 번호를 선택하세요.\n");
-		content.append("0: 이전 메뉴로 돌아가기");
-
-		printBox(lessor.getEmail(), "승인/반려 대기 요청 조회", content.toString());
-		System.out.print("\u001B[33m선택: \u001B[0m");
-
-		String choice = scanner.nextLine().trim();
-		if (choice.equals("0"))
-			return;
-
-		try {
-			int requestIndex = Integer.parseInt(choice) - 1;
-			if (requestIndex >= 0 && requestIndex < pendingRequests.size()) {
-				showContractRequestDetail(lessor, pendingRequests.get(requestIndex));
-			} else {
-				System.out.println("❌ 잘못된 번호입니다. 다시 선택해주세요.");
-				System.out.print("계속하려면 Enter를 누르세요: ");
-				scanner.nextLine();
-			}
-		} catch (NumberFormatException e) {
-			System.out.println("❌ 숫자를 입력해주세요.");
-			System.out.print("계속하려면 Enter를 누르세요: ");
-			scanner.nextLine();
-		}
 	}
 
 	// 계약 요청 승인
 	private void approveRequest(User lessor, ContractRequest request) {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
-		// 요청 상태를 승인으로 변경
-		request.changeStatus(RequestStatus.APPROVED);
+		// 요청 승인 처리
+		request.approve();
 
+		// 매물 상태 변경
+		Property property = request.getProperty();
+		property.setStatus(PropertyStatus.IN_CONTRACT);
+
+		// 완료 메시지
 		String content = "✅ 계약 요청이 승인되었습니다!\n\n" +
-			"📋 승인된 요청 정보:\n" +
-			"• 요청 번호: " + request.getId() + "\n" +
-			"• 매물: " + request.getProperty().getLocation().getCity() + " " +
-			request.getProperty().getLocation().getDistrict() + "\n" +
-			"• 승인 일시: " + formatDateTime(java.time.LocalDateTime.now()) + "\n\n" +
+			"매물 상태가 '거래 대기 중'으로 변경되었습니다.\n\n" +
 			"1: 요청 목록으로 돌아가기\n" +
 			"0: 메인 메뉴로 돌아가기";
 
-		printBox(lessor.getEmail(), "계약 요청 승인 완료", content);
+		UIHelper.printBox(lessor.getEmail(), "승인 완료", content);
 		System.out.print("\u001B[33m선택: \u001B[0m");
 
 		String choice = scanner.nextLine().trim();
@@ -2099,22 +1882,18 @@ public class MainView {
 
 	// 계약 요청 반려
 	private void rejectRequest(User lessor, ContractRequest request) {
-		clearScreen();
-		printHeader("부동산 플랫폼");
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
 
-		// 요청 상태를 반려로 변경
-		request.changeStatus(RequestStatus.REJECTED);
+		// 요청 반려 처리
+		request.reject();
 
-		String content = "❌ 계약 요청이 반려되었습니다!\n\n" +
-			"📋 반려된 요청 정보:\n" +
-			"• 요청 번호: " + request.getId() + "\n" +
-			"• 매물: " + request.getProperty().getLocation().getCity() + " " +
-			request.getProperty().getLocation().getDistrict() + "\n" +
-			"• 반려 일시: " + formatDateTime(java.time.LocalDateTime.now()) + "\n\n" +
+		// 완료 메시지
+		String content = "❌ 계약 요청이 반려되었습니다.\n\n" +
 			"1: 요청 목록으로 돌아가기\n" +
 			"0: 메인 메뉴로 돌아가기";
 
-		printBox(lessor.getEmail(), "계약 요청 반려 완료", content);
+		UIHelper.printBox(lessor.getEmail(), "반려 완료", content);
 		System.out.print("\u001B[33m선택: \u001B[0m");
 
 		String choice = scanner.nextLine().trim();
@@ -2122,4 +1901,4 @@ public class MainView {
 			viewContractRequests(lessor);
 		}
 	}
-} 
+}
