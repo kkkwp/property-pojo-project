@@ -27,7 +27,7 @@ public class DataInitializer {
 	public void init() {
 		initializeUsers();
 		initializeProperties();
-		initializeUsers();
+		initializeContractRequests();
 	}
 
 	private void initializeUsers() {
