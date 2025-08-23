@@ -135,6 +135,7 @@ public class UIHelper {
 		System.out.println("\u001B[36m└─────────────────────────────────────────────────────────────────┘\u001B[0m");
 	}
 
+	// 매물 타입
 	public static String getPropertyTypeDisplayName(PropertyType type) {
 		switch (type) {
 			case APARTMENT:
@@ -150,31 +151,7 @@ public class UIHelper {
 		}
 	}
 
-	public static String getDealTypeDisplayName(DealType type) {
-		switch (type) {
-			case JEONSE:
-				return "전세";
-			case MONTHLY:
-				return "월세";
-			case SALE:
-				return "매매";
-			default:
-				return type.name();
-		}
-	}
-
-	public static String formatPriceForDisplay(Price price, DealType dealType) {
-		if (dealType == DealType.MONTHLY) {
-			return String.format("보증금: %,d원, 월세: %,d원", price.getDeposit(), price.getMonthlyRent());
-		} else if (dealType == DealType.JEONSE) {
-			return String.format("전세금: %,d원", price.getDeposit());
-		} else if (dealType == DealType.SALE) {
-			return String.format("매매가: %,d원", price.getDeposit());
-		} else {
-			return String.format("%,d원", price.getDeposit());
-		}
-	}
-
+	// 매물 상태
 	public static String getPropertyStatusDisplayName(PropertyStatus status) {
 		switch (status) {
 			case AVAILABLE:
@@ -188,6 +165,34 @@ public class UIHelper {
 		}
 	}
 
+	// 거래 타입
+	public static String getDealTypeDisplayName(DealType type) {
+		switch (type) {
+			case JEONSE:
+				return "전세";
+			case MONTHLY:
+				return "월세";
+			case SALE:
+				return "매매";
+			default:
+				return type.name();
+		}
+	}
+
+	// 가격
+	public static String formatPriceForDisplay(Price price, DealType dealType) {
+		if (dealType == DealType.MONTHLY) {
+			return String.format("보증금: %,d원, 월세: %,d원", price.getDeposit(), price.getMonthlyRent());
+		} else if (dealType == DealType.JEONSE) {
+			return String.format("전세금: %,d원", price.getDeposit());
+		} else if (dealType == DealType.SALE) {
+			return String.format("매매가: %,d원", price.getDeposit());
+		} else {
+			return String.format("%,d원", price.getDeposit());
+		}
+	}
+
+	// 계약요청 상태
 	public static String getRequestStatusDisplayName(RequestStatus status) {
 		switch (status) {
 			case REQUESTED:
@@ -201,6 +206,7 @@ public class UIHelper {
 		}
 	}
 
+	// 날짜 포맷
 	public static String formatDateTime(java.time.LocalDateTime dateTime) {
 		if (dateTime == null)
 			return "날짜 정보 없음";

@@ -38,8 +38,8 @@ public class PropertyRepository {
 			.filter(property -> property.getStatus() != PropertyStatus.COMPLETED)
 			.filter(property -> filterByCity(property, filter.getCity()))
 			.filter(property -> filterByDistrict(property, filter.getDistrict()))
-			.filter(property -> filterByPropertyType(property, filter.getPropertyType()))
-			.filter(property -> filterByDealType(property, filter.getDealType()))
+			.filter(property -> filterByPropertyTypes(property, filter.getPropertyTypes()))
+			.filter(property -> filterByDealTypes(property, filter.getDealTypes()))
 			.filter(property -> filterByPrice(property, filter.getMinPrice(), filter.getMaxPrice()))
 			.collect(Collectors.toList());
 	}
@@ -52,12 +52,16 @@ public class PropertyRepository {
 		return district == null || property.getLocation().getDistrict().equals(district);
 	}
 
-	private boolean filterByPropertyType(Property property, PropertyType propertyType) {
-		return propertyType == null || property.getPropertyType().equals(propertyType);
+	private boolean filterByPropertyTypes(Property property, List<PropertyType> propertyTypes) {
+		if (propertyTypes == null || propertyTypes.isEmpty())
+			return true;
+		return propertyTypes.contains(property.getPropertyType());
 	}
 
-	private boolean filterByDealType(Property property, DealType dealType) {
-		return dealType == null || property.getDealType().equals(dealType);
+	private boolean filterByDealTypes(Property property, List<DealType> dealTypes) {
+		if (dealTypes == null || dealTypes.isEmpty())
+			return true;
+		return dealTypes.contains(property.getDealType());
 	}
 
 	private boolean filterByPrice(Property property, long minPrice, long maxPrice) {
