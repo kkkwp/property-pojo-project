@@ -13,7 +13,6 @@ import domain.enums.PropertyStatus;
 import domain.enums.PropertyType;
 import domain.enums.RequestStatus;
 import dto.PropertyCreateRequest;
-import exception.CustomException;
 import service.IContractService;
 import service.IPropertyService;
 import view.ui.UIHelper;
@@ -24,7 +23,8 @@ public class LessorView {
 	private final IPropertyService propertyService;
 	private final IContractService contractService;
 
-	public LessorView(Scanner scanner, User lessor, IPropertyService propertyService, IContractService contractService) {
+	public LessorView(Scanner scanner, User lessor, IPropertyService propertyService,
+		IContractService contractService) {
 		this.scanner = scanner;
 		this.lessor = lessor;
 		this.propertyService = propertyService;
@@ -787,7 +787,7 @@ public class LessorView {
 		UIHelper.clearScreen();
 		UIHelper.printHeader("부동산 플랫폼");
 
-		List<ContractRequest> allRequests = contractRequestRepository.findAll();
+		List<ContractRequest> allRequests = contractService.findContractRequestsByUserId(lessor.getId());
 
 		if (allRequests.isEmpty()) {
 			String content = "계약 요청 조회\n\n" +
@@ -820,7 +820,7 @@ public class LessorView {
 
 		for (int i = 0; i < allRequests.size(); i++) {
 			ContractRequest request = allRequests.get(i);
-			Property property = request.getPropertyId();
+			Property property = propertyService.findPropertyById(request.getPropertyId());
 
 			String statusText = "";
 			switch (request.getStatus()) {
@@ -879,7 +879,7 @@ public class LessorView {
 		UIHelper.clearScreen();
 		UIHelper.printHeader("부동산 플랫폼");
 
-		Property property = request.getProperty();
+		Property property = propertyService.findPropertyById(request.getPropertyId());
 
 		String statusEmoji = "";
 		switch (request.getStatus()) {
@@ -967,10 +967,8 @@ public class LessorView {
 
 		request.setStatus(RequestStatus.APPROVED);
 
-
 		Long propertyId = request.getPropertyId();
-		Property property = propertyRepository.findById(propertyId)
-				.orElseThrow(() -> new CustomException())
+		Property property = propertyService.findPropertyById(propertyId);
 		property.setStatus(PropertyStatus.IN_CONTRACT);
 
 		String content = "✅ 계약 요청이 승인되었습니다!\n\n" +

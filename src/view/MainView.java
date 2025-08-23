@@ -5,9 +5,8 @@ import java.util.Scanner;
 
 import domain.User;
 import domain.enums.Role;
-import repository.ContractRequestRepository;
-import repository.PropertyRepository;
 import service.IAuthService;
+import service.IContractService;
 import service.IPropertyService;
 import view.ui.UIHelper;
 
@@ -15,17 +14,13 @@ public class MainView {
 	private final Scanner scanner;
 	private final IAuthService authService;
 	private final IPropertyService propertyService;
-	private final PropertyRepository propertyRepository;
-	private final ContractRequestRepository contractRequestRepository;
+	private final IContractService contractService;
 
-	public MainView(IAuthService authService, IPropertyService propertyService,
-		PropertyRepository propertyRepository,
-		ContractRequestRepository contractRequestRepository) {
+	public MainView(IAuthService authService, IPropertyService propertyService, IContractService contractService) {
 		this.scanner = new Scanner(System.in);
 		this.authService = authService;
 		this.propertyService = propertyService;
-		this.propertyRepository = propertyRepository;
-		this.contractRequestRepository = contractRequestRepository;
+		this.contractService = contractService;
 	}
 
 	public void start() {
@@ -58,10 +53,10 @@ public class MainView {
 
 			// 사용자 역할에 따라 다른 메뉴 표시
 			if (user.getRole() == Role.LESSOR) {
-				LessorView lessorView = new LessorView(scanner, user, propertyRepository, contractRequestRepository);
+				LessorView lessorView = new LessorView(scanner, user, propertyService, contractService);
 				lessorView.showMenu();
 			} else if (user.getRole() == Role.LESSEE) {
-				LesseeView lesseeView = new LesseeView(scanner, user, propertyService, contractRequestRepository);
+				LesseeView lesseeView = new LesseeView(scanner, user, propertyService, contractService);
 				lesseeView.showMenu();
 			}
 		} else {

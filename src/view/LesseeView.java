@@ -10,7 +10,7 @@ import domain.User;
 import domain.enums.DealType;
 import domain.enums.PropertyType;
 import dto.PropertyFilter;
-import repository.ContractRequestRepository;
+import service.IContractService;
 import service.IPropertyService;
 import view.ui.UIHelper;
 
@@ -18,14 +18,14 @@ public class LesseeView {
 	private final Scanner scanner;
 	private final User lessee;
 	private final IPropertyService propertyService;
-	private final ContractRequestRepository contractRequestRepository;
+	private final IContractService contractService;
 
 	public LesseeView(Scanner scanner, User lessee, IPropertyService propertyService,
-		ContractRequestRepository contractRequestRepository) {
+		IContractService contractService) {
 		this.scanner = scanner;
 		this.lessee = lessee;
 		this.propertyService = propertyService;
-		this.contractRequestRepository = contractRequestRepository;
+		this.contractService = contractService;
 	}
 
 	public void showMenu() {
@@ -580,14 +580,8 @@ public class LesseeView {
 		String confirmChoice = scanner.nextLine().trim().toLowerCase();
 
 		if (confirmChoice.equals("y")) {
-			for (Property property : selectedProperties) {
-				ContractRequest contractRequest = new ContractRequest(
-					null,
-					lessee.getId(),
-					property.getId()
-				);
-				contractRequestRepository.save(contractRequest);
-			}
+			for (Property property : selectedProperties)
+				contractService.createRequest(lessee, property.getId());
 
 			UIHelper.clearScreen();
 			UIHelper.printHeader("부동산 플랫폼");
@@ -625,7 +619,7 @@ public class LesseeView {
 		UIHelper.clearScreen();
 		UIHelper.printHeader("부동산 플랫폼");
 
-		List<ContractRequest> myRequests = contractRequestRepository.findAllByRequesterId(lessee.getId());
+		List<ContractRequest> myRequests = contractService.findContractRequestsByUserId(lessee.getId());
 
 		if (myRequests.isEmpty()) {
 			String content = "내 계약 요청 조회\n\n" +
