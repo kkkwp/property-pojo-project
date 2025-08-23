@@ -1,9 +1,14 @@
 package service;
 
+import java.util.List;
+
 import domain.ContractRequest;
 import domain.User;
 
 public interface IContractService {
+	// 임차인이 한 요청 목록 조회
+	List<ContractRequest> findContractRequestsByUserId(Long userId);
+
 	/**
 	 * 계약 요청을 생성합니다.
 	 * @param lessee 요청자 (임차인)

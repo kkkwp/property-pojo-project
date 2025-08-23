@@ -49,10 +49,6 @@ public class ContractRequest {
 		this.status = status;
 	}
 
-	public void setSubmittedAt(LocalDateTime submittedAt) {
-		this.submittedAt = submittedAt;
-	}
-
 	@Override
 	public String toString() {
 		return String.format("요청번호: %d | 요청자 ID: %s | 매물 ID: %s | 요청 상태: [%s] | 요청 시간: %s",

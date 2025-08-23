@@ -1,5 +1,6 @@
 package service;
 
+import java.util.List;
 import java.util.Optional;
 
 import domain.ContractRequest;
@@ -23,6 +24,11 @@ public class ContractService implements IContractService {
 		this.requestRepository = requestRepository;
 		this.propertyRepository = propertyRepository;
 		this.validator = validator;
+	}
+
+	@Override
+	public List<ContractRequest> findContractRequestsByUserId(Long userId) {
+		return requestRepository.findAllByRequesterId(userId);
 	}
 
 	@Override
