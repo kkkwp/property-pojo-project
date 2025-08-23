@@ -35,8 +35,7 @@ public class Main {
 		dataInitializer.init();
 
 		// 메인 뷰 시작
-		MainView mainView = new MainView(authService, propertyService, contractService, propertyRepository,
-			contractRequestRepository);
+		MainView mainView = new MainView(authService, propertyService, propertyRepository, contractRequestRepository);
 		mainView.start();
 	}
 }
