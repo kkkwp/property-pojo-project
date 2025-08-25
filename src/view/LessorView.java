@@ -754,32 +754,7 @@ public class LessorView {
 	// ======================================= 계약요청 =======================================
 	// 계약요청 관리
 	private void manageContractRequests() {
-		while (true) {
-			UIHelper.clearScreen();
-			UIHelper.printHeader("부동산 플랫폼");
-
-			String content = "계약 요청 관리\n" +
-				"\n" +
-				"1. 계약 요청 조회\n" +
-				"0. 이전 메뉴로 돌아가기";
-
-			UIHelper.printBox(lessor.getEmail(), "계약 요청 관리", content);
-			System.out.print("\u001B[33m선택: \u001B[0m");
-
-			String choice = scanner.nextLine();
-			switch (choice) {
-				case "1":
-					viewContractRequests();
-					break;
-				case "0":
-					return;
-				default:
-					System.out.println("❌ 잘못된 번호입니다.");
-					System.out.print("계속하려면 Enter를 누르세요: ");
-					scanner.nextLine();
-					break;
-			}
-		}
+		viewContractRequests();
 	}
 
 	// 계약요청 조회
