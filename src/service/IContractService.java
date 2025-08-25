@@ -8,6 +8,9 @@ import domain.User;
 public interface IContractService {
 	// 임차인이 한 요청 목록 조회
 	List<ContractRequest> findContractRequestsByUserId(Long userId);
+	
+	// 특정 매물 소유자의 매물에 대한 모든 요청 목록 조회
+	List<ContractRequest> findContractRequestsByPropertyOwnerId(Long ownerId);
 
 	/**
 	 * 계약 요청을 생성합니다.

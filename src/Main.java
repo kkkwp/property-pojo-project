@@ -1,4 +1,10 @@
 import config.DataInitializer;
+import domain.ContractRequest;
+import domain.Location;
+import domain.Price;
+import domain.Property;
+import domain.enums.DealType;
+import domain.enums.PropertyType;
 import repository.ContractRequestRepository;
 import repository.PropertyRepository;
 import repository.UserRepository;
@@ -35,7 +41,7 @@ public class Main {
 		dataInitializer.init();
 
 		// 메인 뷰 시작
-		MainView mainView = new MainView(authService, propertyService, propertyRepository, contractRequestRepository);
+		MainView mainView = new MainView(authService, propertyService, contractService);
 		mainView.start();
 	}
 }

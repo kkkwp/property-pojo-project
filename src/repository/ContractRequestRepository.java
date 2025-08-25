@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import domain.ContractRequest;
+import domain.Property;
 import domain.enums.RequestStatus;
 
 // TODO: 특정 임대인이 받은 모든 요청 목록 조회 구현
@@ -33,6 +34,16 @@ public class ContractRequestRepository {
 	public List<ContractRequest> findAllByRequesterId(Long userId) {
 		return requests.values().stream()
 			.filter(request -> request.getRequesterId().equals(userId))
+			.collect(Collectors.toList());
+	}
+
+	// 특정 매물 소유자의 매물에 대한 모든 요청 목록 조회
+	public List<ContractRequest> findAllByPropertyOwnerId(Long ownerId, PropertyRepository propertyRepository) {
+		return requests.values().stream()
+			.filter(request -> {
+				Optional<Property> property = propertyRepository.findById(request.getPropertyId());
+				return property.isPresent() && property.get().getOwnerId().equals(ownerId);
+			})
 			.collect(Collectors.toList());
 	}
 

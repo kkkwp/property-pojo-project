@@ -787,7 +787,7 @@ public class LessorView {
 		UIHelper.clearScreen();
 		UIHelper.printHeader("부동산 플랫폼");
 
-		List<ContractRequest> allRequests = contractService.findContractRequestsByUserId(lessor.getId());
+		List<ContractRequest> allRequests = contractService.findContractRequestsByPropertyOwnerId(lessor.getId());
 
 		if (allRequests.isEmpty()) {
 			String content = "계약 요청 조회\n\n" +

@@ -32,6 +32,11 @@ public class ContractService implements IContractService {
 	}
 
 	@Override
+	public List<ContractRequest> findContractRequestsByPropertyOwnerId(Long ownerId) {
+		return requestRepository.findAllByPropertyOwnerId(ownerId, propertyRepository);
+	}
+
+	@Override
 	public ContractRequest createRequest(User lessee, Long propertyId) {
 		// 1. 매물 조회
 		Optional<Property> propertyOptional = propertyRepository.findById(propertyId);

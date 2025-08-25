@@ -685,5 +685,72 @@ public class LesseeView {
 		String choice = scanner.nextLine().trim();
 		if (choice.equals("0"))
 			return;
+		
+		try {
+			int selectedIndex = Integer.parseInt(choice);
+			if (selectedIndex >= 1 && selectedIndex <= myRequests.size()) {
+				showContractRequestDetail(myRequests.get(selectedIndex - 1));
+			} else {
+				System.out.println("❌ 잘못된 번호입니다.");
+				System.out.print("계속하려면 Enter를 누르세요: ");
+				scanner.nextLine();
+				viewMyContractRequests(); // 목록으로 다시 돌아가기
+			}
+		} catch (NumberFormatException e) {
+			System.out.println("❌ 숫자를 입력해주세요.");
+			System.out.print("계속하려면 Enter를 누르세요: ");
+			scanner.nextLine();
+			viewMyContractRequests(); // 목록으로 다시 돌아가기
+		}
+	}
+
+	// 계약 요청 상세 조회
+	private void showContractRequestDetail(ContractRequest request) {
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
+
+		// 매물 정보 가져오기
+		Property property = null;
+		try {
+			property = propertyService.findPropertyById(request.getPropertyId());
+		} catch (Exception e) {
+			// 매물을 찾을 수 없는 경우 null로 처리
+		}
+		
+		StringBuilder content = new StringBuilder();
+		content.append("=== 계약 요청 상세 정보 ===\n\n");
+		content.append("📋 요청 번호: " + request.getId() + "\n");
+		content.append("📅 요청 일시: " + UIHelper.formatDateTime(request.getSubmittedAt()) + "\n");
+		content.append("📊 요청 상태: " + UIHelper.getRequestStatusDisplayName(request.getStatus()) + "\n\n");
+		
+		content.append("=== 매물 정보 ===\n");
+		if (property != null) {
+			content.append("🏠 매물 유형: " + UIHelper.getPropertyTypeDisplayName(property.getPropertyType()) + "\n");
+			content.append("📍 위치: " + property.getLocation().getCity() + " " + property.getLocation().getDistrict() + "\n");
+			content.append("💰 거래 유형: " + UIHelper.getDealTypeDisplayName(property.getDealType()) + "\n");
+			content.append("💵 가격: " + UIHelper.formatPriceForDisplay(property.getPrice(), property.getDealType()) + "\n");
+			content.append("📊 매물 상태: " + UIHelper.getPropertyStatusDisplayName(property.getStatus()) + "\n");
+		} else {
+			content.append("❌ 매물 정보를 찾을 수 없습니다.\n");
+		}
+		
+		content.append("\n1: 매물 목록으로 돌아가기\n");
+		content.append("0: 메인 메뉴로 돌아가기");
+
+		UIHelper.printBox(lessee.getEmail(), "계약 요청 상세", content.toString());
+		System.out.print("\u001B[33m선택: \u001B[0m");
+
+		String choice = scanner.nextLine().trim();
+		if (choice.equals("1")) {
+			viewMyContractRequests();
+		} else if (choice.equals("0")) {
+			// 메인 메뉴로 돌아가기 - 아무것도 하지 않음 (showMenu()의 while 루프로 돌아감)
+			return;
+		} else {
+			System.out.println("❌ 잘못된 선택입니다.");
+			System.out.print("계속하려면 Enter를 누르세요: ");
+			scanner.nextLine();
+			showContractRequestDetail(request);
+		}
 	}
 }

@@ -1,5 +1,7 @@
 package config;
 
+import java.util.Optional;
+
 import domain.ContractRequest;
 import domain.Location;
 import domain.Price;
@@ -122,8 +124,42 @@ public class DataInitializer {
 	}
 
 	private void initializeContractRequests() {
-		contractRequestRepository.save(new ContractRequest(null, 2L, 2L));
-		contractRequestRepository.save(new ContractRequest(null, 2L, 3L));
-		contractRequestRepository.save(new ContractRequest(null, 2L, 7L));
+		// 실제 사용자 ID를 가져오기
+		Optional<User> lesseeOptional = userRepository.findByEmail("lessee@test");
+		Optional<User> lessorOptional = userRepository.findByEmail("lessor@test");
+		
+		if (lesseeOptional.isPresent() && lessorOptional.isPresent()) {
+			Long lesseeId = lesseeOptional.get().getId();
+			Long lessorId = lessorOptional.get().getId();
+			
+			// 임차인이 임대인의 매물들에 요청한 계약들
+			ContractRequest request1 = new ContractRequest(null, lesseeId, 2L); // 승인 대기 중
+			contractRequestRepository.save(request1);
+			
+			ContractRequest request2 = new ContractRequest(null, lesseeId, 3L); // 승인 대기 중
+			contractRequestRepository.save(request2);
+			
+			ContractRequest request3 = new ContractRequest(null, lesseeId, 4L); // 승인 대기 중
+			contractRequestRepository.save(request3);
+			
+			ContractRequest request4 = new ContractRequest(null, lesseeId, 5L); // 승인 대기 중
+			contractRequestRepository.save(request4);
+			
+			ContractRequest request5 = new ContractRequest(null, lesseeId, 9L); // 승인 대기 중
+			contractRequestRepository.save(request5);
+			
+			ContractRequest request6 = new ContractRequest(null, lesseeId, 10L); // 승인 대기 중
+			contractRequestRepository.save(request6);
+			
+			ContractRequest request7 = new ContractRequest(null, lesseeId, 13L); // 승인 대기 중
+			contractRequestRepository.save(request7);
+			
+			ContractRequest request8 = new ContractRequest(null, lesseeId, 15L); // 승인 대기 중
+			contractRequestRepository.save(request8);
+			
+			// 임차인이 다른 임대인의 매물에 요청한 계약들
+			ContractRequest request9 = new ContractRequest(null, lesseeId, 7L); // 승인 대기 중
+			contractRequestRepository.save(request9);
+		}
 	}
 }

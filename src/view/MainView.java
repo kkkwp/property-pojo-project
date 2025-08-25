@@ -51,14 +51,14 @@ public class MainView {
 
 			UIHelper.printBox(user.getEmail(), "로그인 성공", successContent);
 
-			// 사용자 역할에 따라 다른 메뉴 표시
-			if (user.getRole() == Role.LESSOR) {
-				LessorView lessorView = new LessorView(scanner, user, propertyService, contractService);
-				lessorView.showMenu();
-			} else if (user.getRole() == Role.LESSEE) {
-				LesseeView lesseeView = new LesseeView(scanner, user, propertyService, contractService);
-				lesseeView.showMenu();
-			}
+					// 사용자 역할에 따라 다른 메뉴 표시
+		if (user.getRole() == Role.LESSOR) {
+			LessorView lessorView = new LessorView(scanner, user, propertyService, contractService);
+			lessorView.showMenu();
+		} else if (user.getRole() == Role.LESSEE) {
+			LesseeView lesseeView = new LesseeView(scanner, user, propertyService, contractService);
+			lesseeView.showMenu();
+		}
 		} else {
 			UIHelper.clearScreen();
 			UIHelper.printHeader("부동산 플랫폼");

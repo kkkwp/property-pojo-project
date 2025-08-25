@@ -22,7 +22,7 @@ public class PropertyRepository {
 	public Property save(Property property) {
 		Property newProperty = new Property(++sequence, property.getOwnerId(), property.getLocation(),
 			property.getPrice(), property.getPropertyType(), property.getDealType());
-		properties.put(property.getId(), newProperty);
+		properties.put(newProperty.getId(), newProperty);
 		return newProperty;
 	}
 
