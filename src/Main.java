@@ -21,7 +21,8 @@ public class Main {
 			if (System.getProperty("os.name").toLowerCase().contains("windows")) {
 				// 윈도우에서 ANSI 색상 활성화
 				System.setProperty("file.encoding", "UTF-8");
-				// JNA 라이브러리를 사용하지 않고 기본 방법으로 처리
+				// 파워쉘에서 유니코드 지원 활성화
+				System.setProperty("console.encoding", "UTF-8");
 			}
 		} catch (Exception e) {
 			// 설정 실패해도 계속 진행
