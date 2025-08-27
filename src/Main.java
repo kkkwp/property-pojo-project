@@ -1,5 +1,3 @@
-package main;
-
 import config.DataInitializer;
 import domain.User;
 import domain.enums.Role;
@@ -9,9 +7,9 @@ import repository.UserRepository;
 import service.AuthService;
 import service.ContractService;
 import service.PropertyService;
-import service.interfaces.IAuthService;
-import service.interfaces.IContractService;
-import service.interfaces.IPropertyService;
+import service.IAuthService;
+import service.IContractService;
+import service.IPropertyService;
 import validator.ContractValidator;
 import validator.PropertyValidator;
 import view.MainView;
