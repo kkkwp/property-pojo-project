@@ -11,14 +11,14 @@ public class Contract {
     private final User requester;
     private final ContractRequest request;
     
-    public Contract(String id, String contractDate, String moveInDate, ContractRequest request) {
+    public Contract(String id, String contractDate, String moveInDate, ContractRequest request, Property property, User requester) {
         this.id = id;
         this.contractDate = contractDate;
         this.moveInDate = moveInDate;
         this.status = ContractStatus.PENDING;  // 계약 진행 중 상태로 시작
         this.request = request;
-        this.property = request.getProperty();
-        this.requester = request.getRequester();
+        this.property = property;
+        this.requester = requester;
     }
     
     // Getter 메서드들
