@@ -7,18 +7,18 @@ public class Contract {
     private final String contractDate;
     private final String moveInDate;
     private ContractStatus status;
-    private final Property property;
-    private final User requester;
+    private final Long propertyId;
+    private final Long requesterId;
     private final ContractRequest request;
     
-    public Contract(String id, String contractDate, String moveInDate, ContractRequest request, Property property, User requester) {
+    public Contract(String id, String contractDate, String moveInDate, ContractRequest request) {
         this.id = id;
         this.contractDate = contractDate;
         this.moveInDate = moveInDate;
         this.status = ContractStatus.PENDING;  // 계약 진행 중 상태로 시작
         this.request = request;
-        this.property = property;
-        this.requester = requester;
+        this.propertyId = request.getPropertyId();
+        this.requesterId = request.getRequesterId();
     }
     
     // Getter 메서드들
@@ -38,12 +38,12 @@ public class Contract {
         return status;
     }
     
-    public Property getProperty() {
-        return property;
+    public Long getPropertyId() {
+        return propertyId;
     }
     
-    public User getRequester() {
-        return requester;
+    public Long getRequesterId() {
+        return requesterId;
     }
     
     public ContractRequest getRequest() {
@@ -67,11 +67,6 @@ public class Contract {
         
         this.status = ContractStatus.COMPLETED;
         
-        // 관련된 Property 상태도 업데이트
-        if (this.property != null) {
-            this.property.markAsCompleted();
-        }
-        
         System.out.println("계약이 완료되었습니다: " + this.id);
     }
     
@@ -82,11 +77,6 @@ public class Contract {
         }
         
         this.status = ContractStatus.CANCELLED;
-        
-        // 관련된 Property 상태를 다시 AVAILABLE로 변경
-        if (this.property != null) {
-            this.property.markAsAvailable();
-        }
         
         System.out.println("계약이 취소되었습니다: " + this.id);
     }
@@ -111,8 +101,8 @@ public class Contract {
             ", contractDate='" + contractDate + '\'' +
             ", moveInDate='" + moveInDate + '\'' +
             ", status=" + status +
-            ", property=" + property +
-            ", requester=" + requester +
+            ", propertyId=" + propertyId +
+            ", requesterId=" + requesterId +
             ", request=" + request +
             '}';
     }
