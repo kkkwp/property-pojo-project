@@ -18,7 +18,8 @@ public class MainView {
 	private final IContractService contractService;
 	private final UserRepository userRepository;
 
-	public MainView(IAuthService authService, IPropertyService propertyService, IContractService contractService, UserRepository userRepository) {
+	public MainView(IAuthService authService, IPropertyService propertyService, IContractService contractService,
+		UserRepository userRepository) {
 		this.scanner = new Scanner(System.in);
 		this.authService = authService;
 		this.propertyService = propertyService;
@@ -57,13 +58,14 @@ public class MainView {
 
 				// 사용자 역할에 따라 다른 메뉴 표시
 				if (user.getRole() == Role.LESSOR) {
-					LessorView lessorView = new LessorView(scanner, user, propertyService, contractService, userRepository);
+					LessorView lessorView = new LessorView(scanner, user, propertyService, contractService,
+						userRepository);
 					lessorView.showMenu();
 				} else if (user.getRole() == Role.LESSEE) {
 					LesseeView lesseeView = new LesseeView(scanner, user, propertyService, contractService);
 					lesseeView.showMenu();
 				}
-				
+
 				// 로그아웃 후 다시 로그인 화면으로 돌아가기 위해 continue
 				continue;
 			} else {
@@ -77,7 +79,7 @@ public class MainView {
 				System.out.println();
 				System.out.print("계속하려면 Enter를 누르세요: ");
 				scanner.nextLine();
-				
+
 				// 다시 로그인 화면으로 돌아가기 위해 continue
 				continue;
 			}
