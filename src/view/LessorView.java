@@ -366,12 +366,34 @@ public class LessorView {
 
 		for (int i = 0; i < myProperties.size(); i++) {
 			Property property = myProperties.get(i);
-			content.append(String.format("%d. %s %s %s %s\n",
+			String statusEmoji = "";
+			String statusText = "";
+			switch (property.getStatus()) {
+				case AVAILABLE:
+					statusEmoji = "🟢"; // 초록색 원
+					statusText = "거래 가능";
+					break;
+				case IN_CONTRACT:
+					statusEmoji = "🟡"; // 노란색 원
+					statusText = "거래 대기 중";
+					break;
+				case COMPLETED:
+					statusEmoji = "🔴"; // 빨간색 원
+					statusText = "거래 완료";
+					break;
+				default:
+					statusEmoji = "⚪"; // 흰색 원
+					statusText = "알 수 없음";
+					break;
+			}
+			
+			content.append(String.format("%d. %s %s %s %s %s\n",
 				(i + 1),
 				property.getLocation().getCity() + " " + property.getLocation().getDistrict(),
 				UIHelper.getPropertyTypeDisplayName(property.getPropertyType()),
 				UIHelper.getDealTypeDisplayName(property.getDealType()),
-				UIHelper.getPropertyStatusDisplayName(property.getStatus())
+				statusEmoji,
+				statusText
 			));
 		}
 
