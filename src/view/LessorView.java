@@ -819,14 +819,14 @@ public class LessorView {
 					UIHelper.printHeader("부동산 플랫폼");
 
 					String successContent = "✅ 매물이 성공적으로 삭제되었습니다!\n\n" +
-						"1: 매물 목록으로 돌아가기\n" +
+						"1: 삭제 목록으로 돌아가기\n" +
 						"0: 메인 메뉴로 돌아가기";
 					UIHelper.printBox(lessor.getEmail(), "삭제 완료", successContent);
 					System.out.print("\u001B[33m선택: \u001B[0m");
 
 					String returnChoice = scanner.nextLine().trim();
 					if (returnChoice.equals("1")) {
-						viewMyProperties();
+						deleteProperty(); // 삭제 목록으로 돌아가기
 					}
 				}
 			} else {
