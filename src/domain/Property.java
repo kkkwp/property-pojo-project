@@ -8,9 +8,9 @@ public class Property {
 	private final Long id;
 	private final Long ownerId; // 임대인 ID
 	private final Location location; // 지역 (시/군/구)
-	private final Price price; // 가격 (보증금, 월세)
+	private Price price; // 가격 (보증금, 월세) - 수정 가능하도록 final 제거
 	private final PropertyType propertyType; // 집 유형 (아파트/빌라/오피스텔/원룸)
-	private final DealType dealType; // 거래 유형 (전세/월세/매매)
+	private DealType dealType; // 거래 유형 (전세/월세/매매) - 수정 가능하도록 final 제거
 	private PropertyStatus status; // 매물 상태
 
 	public Property(Long id, Long ownerId, Location location, Price price, PropertyType propertyType,
@@ -58,19 +58,16 @@ public class Property {
 		this.status = status;
 	}
 
-	// 거래 유형 변경 (가격도 함께 변경해야 함)
+	// 거래 유형 변경
 	public void setDealType(DealType dealType) {
-		// 이 메서드는 실제로는 새로운 Property 객체를 생성해야 하지만,
-		// 현재 구조에서는 final 필드이므로 임시로 처리
-		// 실제로는 Property를 immutable하게 유지하는 것이 좋음
-		throw new UnsupportedOperationException("거래 유형 변경은 새로운 매물 등록을 통해 처리해주세요.");
+		// 거래 유형 변경을 허용
+		this.dealType = dealType;
 	}
 
 	// 가격 변경
 	public void setPrice(Price price) {
-		// 이 메서드도 실제로는 새로운 Property 객체를 생성해야 하지만,
-		// 현재 구조에서는 final 필드이므로 임시로 처리
-		throw new UnsupportedOperationException("가격 변경은 새로운 매물 등록을 통해 처리해주세요.");
+		// 가격 변경을 허용
+		this.price = price;
 	}
 
     // 상태 변경 메서드들

@@ -569,7 +569,7 @@ public class LessorView {
 
 		String successContent = "✅ 가격이 성공적으로 변경되었습니다!\n\n" +
 			"변경된 가격: " + UIHelper.formatPriceForDisplay(newPrice, property.getDealType()) + "\n\n" +
-			"1: 매물 목록으로 돌아가기\n" +
+			"1: 수정 목록으로 돌아가기\n" +
 			"0: 메인 메뉴로 돌아가기";
 
 		UIHelper.printBox(lessor.getEmail(), "가격 변경 완료", successContent);
@@ -577,7 +577,7 @@ public class LessorView {
 
 		String returnChoice = scanner.nextLine().trim();
 		if (returnChoice.equals("1")) {
-			viewMyProperties();
+			updateProperty(); // 수정 목록으로 돌아가기
 		}
 	}
 
@@ -622,20 +622,92 @@ public class LessorView {
 
 		property.setDealType(newDealType);
 
+		// 거래 유형 변경 후 새로운 가격 입력받기
 		UIHelper.clearScreen();
 		UIHelper.printHeader("부동산 플랫폼");
 
-		String successContent = "✅ 거래 유형이 성공적으로 변경되었습니다!\n\n" +
-			"변경된 거래 유형: " + UIHelper.getDealTypeDisplayName(newDealType) + "\n\n" +
-			"1: 매물 목록으로 돌아가기\n" +
+		StringBuilder priceContent = new StringBuilder();
+		priceContent.append("거래 유형이 변경되었습니다!\n\n");
+		priceContent.append("변경된 거래 유형: " + UIHelper.getDealTypeDisplayName(newDealType) + "\n\n");
+		priceContent.append("새로운 거래 유형에 맞는 가격을 입력해주세요.\n\n");
+
+		if (newDealType == DealType.MONTHLY) {
+			priceContent.append("보증금과 월세를 입력해주세요.\n");
+			priceContent.append("예시: 보증금 10000000원, 월세 500000원\n");
+		} else if (newDealType == DealType.JEONSE) {
+			priceContent.append("전세금을 입력해주세요.\n");
+			priceContent.append("예시: 50000000원\n");
+		} else {
+			priceContent.append("매매가를 입력해주세요.\n");
+			priceContent.append("예시: 100000000원\n");
+		}
+
+		priceContent.append("\n0: 가격 변경 취소");
+
+		UIHelper.printBox(lessor.getEmail(), "새로운 가격 입력", priceContent.toString());
+
+		Price newPrice = null;
+
+		if (newDealType == DealType.MONTHLY) {
+			System.out.print("\u001B[33m보증금 (원): \u001B[0m");
+			String depositStr = scanner.nextLine().trim();
+			if (depositStr.equals("0"))
+				return;
+
+			System.out.print("\u001B[33m월세 (원): \u001B[0m");
+			String monthlyStr = scanner.nextLine().trim();
+			if (monthlyStr.equals("0"))
+				return;
+
+			try {
+				long deposit = Long.parseLong(depositStr);
+				long monthly = Long.parseLong(monthlyStr);
+				newPrice = new Price(deposit, monthly);
+			} catch (NumberFormatException e) {
+				UIHelper.clearScreen();
+				UIHelper.printHeader("부동산 플랫폼");
+				System.out.println("❌ 숫자를 입력해주세요.");
+				System.out.print("계속하려면 Enter를 누르세요: ");
+				scanner.nextLine();
+				return;
+			}
+		} else {
+			System.out.print("\u001B[33m가격 (원): \u001B[0m");
+			String priceStr = scanner.nextLine().trim();
+			if (priceStr.equals("0"))
+				return;
+
+			try {
+				long price = Long.parseLong(priceStr);
+				newPrice = new Price(price, 0);
+			} catch (NumberFormatException e) {
+				UIHelper.clearScreen();
+				UIHelper.printHeader("부동산 플랫폼");
+				System.out.println("❌ 숫자를 입력해주세요.");
+				System.out.print("계속하려면 Enter를 누르세요: ");
+				scanner.nextLine();
+				return;
+			}
+		}
+
+		// 새로운 가격 설정
+		property.setPrice(newPrice);
+
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
+
+		String successContent = "✅ 거래 유형과 가격이 성공적으로 변경되었습니다!\n\n" +
+			"변경된 거래 유형: " + UIHelper.getDealTypeDisplayName(newDealType) + "\n" +
+			"변경된 가격: " + UIHelper.formatPriceForDisplay(newPrice, newDealType) + "\n\n" +
+			"1: 수정 목록으로 돌아가기\n" +
 			"0: 메인 메뉴로 돌아가기";
 
-		UIHelper.printBox(lessor.getEmail(), "거래 유형 변경 완료", successContent);
+		UIHelper.printBox(lessor.getEmail(), "변경 완료", successContent);
 		System.out.print("\u001B[33m선택: \u001B[0m");
 
 		String returnChoice = scanner.nextLine().trim();
 		if (returnChoice.equals("1")) {
-			viewMyProperties();
+			updateProperty(); // 수정 목록으로 돌아가기
 		}
 	}
 
