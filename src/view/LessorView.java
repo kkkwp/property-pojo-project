@@ -142,7 +142,17 @@ public class LessorView {
 			propertyType,
 			dealType
 		);
-		propertyService.createProperty(lessor, request);
+		
+		try {
+			propertyService.createProperty(lessor, request);
+		} catch (Exception e) {
+			UIHelper.clearScreen();
+			UIHelper.printHeader("부동산 플랫폼");
+			System.out.println("❌ 매물 등록 중 오류가 발생했습니다: " + e.getMessage());
+			System.out.print("계속하려면 Enter를 누르세요: ");
+			scanner.nextLine();
+			return;
+		}
 
 		UIHelper.clearScreen();
 		UIHelper.printHeader("부동산 플랫폼");
@@ -237,6 +247,8 @@ public class LessorView {
 				long monthly = Long.parseLong(monthlyStr);
 				return new Price(deposit, monthly);
 			} catch (NumberFormatException e) {
+				UIHelper.clearScreen();
+				UIHelper.printHeader("부동산 플랫폼");
 				System.out.println("❌ 숫자를 입력해주세요.");
 				System.out.print("계속하려면 Enter를 누르세요: ");
 				scanner.nextLine();
@@ -252,6 +264,8 @@ public class LessorView {
 				long price = Long.parseLong(priceStr);
 				return new Price(price, 0);
 			} catch (NumberFormatException e) {
+				UIHelper.clearScreen();
+				UIHelper.printHeader("부동산 플랫폼");
 				System.out.println("❌ 숫자를 입력해주세요.");
 				System.out.print("계속하려면 Enter를 누르세요: ");
 				scanner.nextLine();
