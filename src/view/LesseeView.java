@@ -734,6 +734,15 @@ public class LesseeView {
 			content.append("❌ 매물 정보를 찾을 수 없습니다.\n");
 		}
 		
+		// 승인된 요청인 경우 임대인 연락처 정보 추가
+		if (request.getStatus() == domain.enums.RequestStatus.APPROVED && property != null) {
+			content.append("\n=== 임대인 연락처 정보 ===\n");
+			content.append("📧 이메일: lessor@test\n");
+			content.append("📞 전화번호: 010-1111-2222\n");
+			content.append("📍 주소: 서울특별시 강남구 테헤란로 123\n");
+			content.append("\n💡 승인된 계약 요청입니다. 위 연락처로 임대인에게 연락하세요!\n");
+		}
+		
 		content.append("\n1: 매물 목록으로 돌아가기\n");
 		content.append("0: 메인 메뉴로 돌아가기");
 

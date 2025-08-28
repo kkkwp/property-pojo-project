@@ -5,6 +5,7 @@ import java.util.Scanner;
 
 import domain.User;
 import domain.enums.Role;
+import repository.UserRepository;
 import service.IAuthService;
 import service.IContractService;
 import service.IPropertyService;
@@ -15,12 +16,14 @@ public class MainView {
 	private final IAuthService authService;
 	private final IPropertyService propertyService;
 	private final IContractService contractService;
+	private final UserRepository userRepository;
 
-	public MainView(IAuthService authService, IPropertyService propertyService, IContractService contractService) {
+	public MainView(IAuthService authService, IPropertyService propertyService, IContractService contractService, UserRepository userRepository) {
 		this.scanner = new Scanner(System.in);
 		this.authService = authService;
 		this.propertyService = propertyService;
 		this.contractService = contractService;
+		this.userRepository = userRepository;
 	}
 
 	public void start() {
@@ -54,7 +57,7 @@ public class MainView {
 
 				// 사용자 역할에 따라 다른 메뉴 표시
 				if (user.getRole() == Role.LESSOR) {
-					LessorView lessorView = new LessorView(scanner, user, propertyService, contractService);
+					LessorView lessorView = new LessorView(scanner, user, propertyService, contractService, userRepository);
 					lessorView.showMenu();
 				} else if (user.getRole() == Role.LESSEE) {
 					LesseeView lesseeView = new LesseeView(scanner, user, propertyService, contractService);

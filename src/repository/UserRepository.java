@@ -26,4 +26,15 @@ public class UserRepository {
 	public Optional<User> findByEmail(String email) {
 		return Optional.ofNullable(users.get(email));
 	}
+
+	/**
+	 * ID로 사용자를 조회
+	 * @param id 조회할 사용자의 ID
+	 * @return 사용자가 존재하면 Optional<User>, 없으면 Optional.empty()를 반환
+	 */
+	public Optional<User> findById(Long id) {
+		return users.values().stream()
+			.filter(user -> user.getId().equals(id))
+			.findFirst();
+	}
 }

@@ -7,11 +7,23 @@ public class User {
 	private final Long id;
 	private final String email;
 	private final Role role;
+	private final String phoneNumber;
+	private final String address;
 
 	public User(Long id, String email, Role role) {
 		this.id = id;
 		this.email = email;
 		this.role = role;
+		this.phoneNumber = "010-1234-5678"; // 기본 전화번호
+		this.address = "서울특별시 강남구"; // 기본 주소
+	}
+
+	public User(Long id, String email, Role role, String phoneNumber, String address) {
+		this.id = id;
+		this.email = email;
+		this.role = role;
+		this.phoneNumber = phoneNumber;
+		this.address = address;
 	}
 
 	public Long getId() {
@@ -24,6 +36,14 @@ public class User {
 
 	public Role getRole() {
 		return role;
+	}
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public String getAddress() {
+		return address;
 	}
 
 	@Override

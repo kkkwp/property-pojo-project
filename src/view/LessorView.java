@@ -1,6 +1,7 @@
 package view;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Scanner;
 
 import domain.ContractRequest;
@@ -13,6 +14,7 @@ import domain.enums.PropertyStatus;
 import domain.enums.PropertyType;
 import domain.enums.RequestStatus;
 import dto.PropertyCreateRequest;
+import repository.UserRepository;
 import service.IContractService;
 import service.IPropertyService;
 import view.ui.UIHelper;
@@ -22,13 +24,15 @@ public class LessorView {
 	private final User lessor;
 	private final IPropertyService propertyService;
 	private final IContractService contractService;
+	private final UserRepository userRepository;
 
 	public LessorView(Scanner scanner, User lessor, IPropertyService propertyService,
-		IContractService contractService) {
+		IContractService contractService, UserRepository userRepository) {
 		this.scanner = scanner;
 		this.lessor = lessor;
 		this.propertyService = propertyService;
 		this.contractService = contractService;
+		this.userRepository = userRepository;
 	}
 
 	public void showMenu() {
@@ -849,12 +853,17 @@ public class LessorView {
 		}
 	}
 
-	// 계약요청 상세보기
-	private void showContractRequestDetail(ContractRequest request) {
-		UIHelper.clearScreen();
-		UIHelper.printHeader("부동산 플랫폼");
+	    // 계약요청 상세보기
+    private void showContractRequestDetail(ContractRequest request) {
+        // 디버그: 실제 요청 상태 확인
+        System.out.println("DEBUG: Request Status = " + request.getStatus());
+        System.out.println("DEBUG: Is APPROVED? = " + (request.getStatus() == RequestStatus.APPROVED));
+        System.out.println("DEBUG: RequestStatus.APPROVED = " + RequestStatus.APPROVED);
+        
+        UIHelper.clearScreen();
+        UIHelper.printHeader("부동산 플랫폼");
 
-		Property property = propertyService.findPropertyById(request.getPropertyId());
+        Property property = propertyService.findPropertyById(request.getPropertyId());
 
 		String statusEmoji = "";
 		switch (request.getStatus()) {
@@ -883,6 +892,22 @@ public class LessorView {
 		content.append("💰 거래 유형: " + UIHelper.getDealTypeDisplayName(property.getDealType()) + "\n");
 		content.append("💵 가격: " + UIHelper.formatPriceForDisplay(property.getPrice(), property.getDealType()) + "\n");
 		content.append("📊 매물 상태: " + UIHelper.getPropertyStatusDisplayName(property.getStatus()) + "\n");
+
+		// 승인된 요청인 경우 임차인 연락처 정보 추가
+		if (request.getStatus() == RequestStatus.APPROVED) {
+			// 임차인 정보 가져오기
+			Optional<User> requesterOptional = userRepository.findById(request.getRequesterId());
+			if (requesterOptional.isPresent()) {
+				User requester = requesterOptional.get();
+				content.append("\n=== 임차인 연락처 정보 ===\n");
+				content.append("📧 이메일: " + requester.getEmail() + "\n");
+				content.append("📞 전화번호: " + requester.getPhoneNumber() + "\n");
+				content.append("📍 주소: " + requester.getAddress() + "\n");
+				content.append("\n💡 승인한 계약 요청입니다. 위 연락처로 임차인에게 연락하세요!\n");
+			} else {
+				content.append("\n임차인 정보를 찾을 수 없습니다.\n");
+			}
+		}
 
 		if (request.getStatus() == RequestStatus.REQUESTED) {
 			content.append("\n=== 승인/반려 처리 ===\n");
@@ -940,15 +965,19 @@ public class LessorView {
 		UIHelper.clearScreen();
 		UIHelper.printHeader("부동산 플랫폼");
 
-		request.setStatus(RequestStatus.APPROVED);
-
-		Long propertyId = request.getPropertyId();
-		Property property = propertyService.findPropertyById(propertyId);
-		property.setStatus(PropertyStatus.IN_CONTRACT);
+		// ContractService를 통해 승인 처리 (Repository 저장 포함)
+		try {
+			contractService.approveRequest(lessor, request.getId());
+		} catch (Exception e) {
+			System.out.println("❌ 승인 처리 중 오류가 발생했습니다: " + e.getMessage());
+			System.out.print("계속하려면 Enter를 누르세요: ");
+			scanner.nextLine();
+			return;
+		}
 
 		String content = "✅ 계약 요청이 승인되었습니다!\n\n" +
 			"매물 상태가 '거래 대기 중'으로 변경되었습니다.\n\n" +
-			"1: 요청 목록으로 돌아가기\n" +
+			"1: 상세보기로 돌아가기\n" +
 			"0: 메인 메뉴로 돌아가기";
 
 		UIHelper.printBox(lessor.getEmail(), "승인 완료", content);
@@ -956,7 +985,13 @@ public class LessorView {
 
 		String choice = scanner.nextLine().trim();
 		if (choice.equals("1")) {
-			viewContractRequests();
+			// 승인된 요청의 최신 데이터로 상세보기
+			ContractRequest updatedRequest = contractService.findContractRequestsByPropertyOwnerId(lessor.getId())
+				.stream()
+				.filter(r -> r.getId().equals(request.getId()))
+				.findFirst()
+				.orElse(request);
+			showContractRequestDetail(updatedRequest);
 		}
 	}
 
@@ -965,10 +1000,18 @@ public class LessorView {
 		UIHelper.clearScreen();
 		UIHelper.printHeader("부동산 플랫폼");
 
-		request.setStatus(RequestStatus.REJECTED);
+		// ContractService를 통해 반려 처리 (Repository 저장 포함)
+		try {
+			contractService.rejectRequest(lessor, request.getId());
+		} catch (Exception e) {
+			System.out.println("❌ 반려 처리 중 오류가 발생했습니다: " + e.getMessage());
+			System.out.print("계속하려면 Enter를 누르세요: ");
+			scanner.nextLine();
+			return;
+		}
 
 		String content = "❌ 계약 요청이 반려되었습니다.\n\n" +
-			"1: 요청 목록으로 돌아가기\n" +
+			"1: 상세보기로 돌아가기\n" +
 			"0: 메인 메뉴로 돌아가기";
 
 		UIHelper.printBox(lessor.getEmail(), "반려 완료", content);
@@ -976,7 +1019,13 @@ public class LessorView {
 
 		String choice = scanner.nextLine().trim();
 		if (choice.equals("1")) {
-			viewContractRequests();
+			// 반려된 요청의 최신 데이터로 상세보기
+			ContractRequest updatedRequest = contractService.findContractRequestsByPropertyOwnerId(lessor.getId())
+				.stream()
+				.filter(r -> r.getId().equals(request.getId()))
+				.findFirst()
+				.orElse(request);
+			showContractRequestDetail(updatedRequest);
 		}
 	}
 }

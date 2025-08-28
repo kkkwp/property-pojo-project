@@ -95,7 +95,8 @@ public class ContractService implements IContractService {
 	// 요청 조회 및 권한 검증을 처리하는 공통 로직 (중복 제거)
 	private ContractRequest findAndValidateRequest(User lessor, Long requestId) {
 		// 1. 사용자가 임대인인지 확인
-		validator.validateUser(lessor);
+		if (!lessor.isLessor())
+			throw new CustomException(ErrorCode.NO_AUTHORITY, "임대인만 계약 요청을 승인/거절할 수 있습니다.");
 		// 2. 계약 요청, 매물 조회
 		ContractRequest request = requestRepository.findById(requestId)
 			.orElseThrow(() -> new CustomException(ErrorCode.REQUEST_NOT_FOUND));
