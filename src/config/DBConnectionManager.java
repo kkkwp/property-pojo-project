@@ -18,19 +18,20 @@ public class DBConnectionManager {
 	}
 
 	public static Connection getConnection() {
-		Connection conn = null;
+		String username = System.getenv("DB_USERNAME");
+		String password = System.getenv("DB_PASSWORD");
+
 		try {
 			Class.forName(prop.getProperty("db.driver-class-name"));
-			conn = DriverManager.getConnection(
+			return DriverManager.getConnection(
 				prop.getProperty("db.url"),
-				prop.getProperty("db.username"),
-				prop.getProperty("db.password")
+				username,
+				password
 			);
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException("JDBC 드라이버를 찾지 못했습니다.");
 		} catch (SQLException e) {
 			throw new RuntimeException("데이터베이스 연결에 실패했습니다.");
 		}
-		return conn;
 	}
 }
