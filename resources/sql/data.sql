@@ -1,0 +1,25 @@
+USE stigma;
+
+INSERT INTO users (email, role, phone_number, address)
+VALUES ('lessor@test', 'LESSOR', '010-1111-2222', '서울특별시 강남구 테헤란로 123'),
+       ('lessee@test', 'USER', '010-3333-4444', '서울특별시 서초구 서초대로 456');
+
+INSERT INTO properties (owner_id, city, district, deposit, monthly_rent, property_type, deal_type, status)
+VALUES # 임대인 ID 1번의 매물들 (서울)
+       (1, '서울특별시', '강남구', 50000000, 0, 'APARTMENT', 'JEONSE', 'AVAILABLE'),
+       (1, '서울특별시', '서초구', 10000000, 800000, 'VILLA', 'MONTHLY', 'AVAILABLE'),
+       (1, '서울특별시', '마포구', 300000000, 0, 'OFFICETEL', 'SALE', 'AVAILABLE'),
+       # 임대인 ID 1번의 매물들 (경기도)
+       (1, '경기도', '수원시', 30000000, 500000, 'APARTMENT', 'MONTHLY', 'AVAILABLE'),
+       (1, '경기도', '성남시', 40000000, 0, 'VILLA', 'JEONSE', 'AVAILABLE'),
+       # 임대인 ID 1번의 원룸 매물들
+       (1, '서울특별시', '종로구', 15000000, 400000, 'ONE_ROOM', 'MONTHLY', 'AVAILABLE'),
+       (1, '서울특별시', '중구', 20000000, 0, 'ONE_ROOM', 'JEONSE', 'AVAILABLE'),
+       # 고가 매물들
+       (1, '서울특별시', '강남구', 1000000000, 0, 'VILLA', 'SALE', 'AVAILABLE'),
+       # 저가 매물들
+       (1, '경기도', '의정부시', 5000000, 300000, 'ONE_ROOM', 'MONTHLY', 'AVAILABLE');
+
+-- contract_requests 테이블은 비워둠 (요청은 사용자가 생성)
+-- 테이블 내용 전체 삭제
+TRUNCATE TABLE contract_requests;

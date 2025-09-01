@@ -1,4 +1,3 @@
-import config.DataInitializer;
 import repository.ContractRequestRepository;
 import repository.PropertyRepository;
 import repository.UserRepository;
@@ -42,11 +41,6 @@ public class Main {
 		IPropertyService propertyService = new PropertyService(propertyRepository, userRepository, propertyValidator);
 		IContractService contractService = new ContractService(contractRequestRepository, propertyRepository,
 			contractValidator);
-
-		// 데이터 초기화
-		DataInitializer dataInitializer = new DataInitializer(userRepository, propertyRepository,
-			contractRequestRepository);
-		dataInitializer.init();
 
 		// 메인 뷰 시작
 		MainView mainView = new MainView(authService, propertyService, contractService, userRepository);
