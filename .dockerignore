@@ -1,0 +1,16 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+
+# Build artifacts
+out/
+bin/
+
+# Local scripts
+*.bat
+
+# Documentation
+README.md

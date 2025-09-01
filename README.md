@@ -24,15 +24,25 @@
 ## 🔵 실행방법
 
 ### 1. Git Clone
-
 ```shell
 git clone https://github.com/stigma-property/java-project.git
 ```
 
-### 2. run.bat 파일 실행
+### 2. 최상위 디렉토리에 `.env` 파일 생성
+```shell
+DB_USERNAME=
+DB_PASSWORD=
+```
+
+### 2. docker 이미지 빌드
 ```shell
 cd 프로젝트 경로
-.\run.bat
+docker build -t java-project .
+```
+
+### 3. docker 컨테이너 실행
+```shell
+docker run --rm -it --env-file ./.env java-project
 ```
 
 <br/>
