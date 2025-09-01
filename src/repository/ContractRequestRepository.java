@@ -1,71 +1,117 @@
 package repository;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import config.DBConnectionManager;
 import domain.ContractRequest;
-import domain.Property;
-import domain.enums.RequestStatus;
 
-// TODO: 특정 임대인이 받은 모든 요청 목록 조회 구현
 public class ContractRequestRepository {
-	private static final Map<Long, ContractRequest> requests = new HashMap<>();
-	private static long sequence = 0L;
-
+	// ID가 없으면 INSERT, 있으면 UPDATE
 	public ContractRequest save(ContractRequest request) {
-		if (request.getId() == null) {
-			long newId = ++sequence;
-			request.setId(newId);
+		if (request.getId() == null)
+			return insert(request);
+		else
+			return update(request);
+	}
+
+	private ContractRequest insert(ContractRequest request) {
+		String sql = "INSERT INTO contract_requests (requester_id, property_id, status, submitted_at) VALUES (?, ?, ?, ?)";
+		try (Connection conn = DBConnectionManager.getConnection();
+			 PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+			stmt.setLong(1, request.getRequesterId());
+			stmt.setLong(2, request.getPropertyId());
+			stmt.setString(3, request.getStatus().name());
+			stmt.setTimestamp(4, Timestamp.valueOf(request.getSubmittedAt()));
+			stmt.executeUpdate();
+
+			try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+				if (generatedKeys.next())
+					request.setId(generatedKeys.getLong(1));
+			}
+			return request;
+		} catch (SQLException e) {
+			throw new RuntimeException("계약 요청 저장에 실패했습니다.");
 		}
-		requests.put(request.getId(), request);
-		return request;
+	}
+
+	private ContractRequest update(ContractRequest request) {
+		String sql = "UPDATE contract_requests SET status = ? WHERE id = ?";
+		try (Connection conn = DBConnectionManager.getConnection();
+			 PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setString(1, request.getStatus().name());
+			stmt.setLong(2, request.getId());
+			stmt.executeUpdate();
+			return request;
+		} catch (SQLException e) {
+			throw new RuntimeException("계약 요청 수정에 실패했습니다.");
+		}
 	}
 
 	// 요청 ID로 특정 요청을 조회
 	public Optional<ContractRequest> findById(Long id) {
-		return Optional.ofNullable(requests.get(id));
+		String sql = "SELECT * FROM contract_requests WHERE id = ?";
+		try (Connection conn = DBConnectionManager.getConnection();
+			 PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setLong(1, id);
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next())
+					return Optional.of(mapContractRequest(rs));
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException("ID로 계약 요청 조회에 실패했습니다.", e);
+		}
+		return Optional.empty();
 	}
 
 	// 특정 사용자가 요청한 모든 요청 목록 조회
 	public List<ContractRequest> findAllByRequesterId(Long userId) {
-		return requests.values().stream()
-			.filter(request -> request.getRequesterId().equals(userId))
-			.collect(Collectors.toList());
+		String sql = "SELECT * FROM contract_requests WHERE requester_id = ?";
+		List<ContractRequest> requests = new ArrayList<>();
+		try (Connection conn = DBConnectionManager.getConnection();
+			 PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setLong(1, userId);
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next())
+					requests.add(mapContractRequest(rs));
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException("요청자 ID로 계약 요청 조회에 실패했습니다.");
+		}
+		return requests;
 	}
 
 	// 특정 매물 소유자의 매물에 대한 모든 요청 목록 조회
 	public List<ContractRequest> findAllByPropertyOwnerId(Long ownerId, PropertyRepository propertyRepository) {
-		return requests.values().stream()
-			.filter(request -> {
-				Optional<Property> property = propertyRepository.findById(request.getPropertyId());
-				return property.isPresent() && property.get().getOwnerId().equals(ownerId);
-			})
-			.collect(Collectors.toList());
+		String sql = "SELECT cr.* FROM contract_requests cr " +
+			"JOIN properties p ON cr.property_id = p.id " +
+			"WHERE p.owner_id = ?";
+		List<ContractRequest> requests = new ArrayList<>();
+		try (Connection conn = DBConnectionManager.getConnection();
+			 PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setLong(1, ownerId);
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next())
+					requests.add(mapContractRequest(rs));
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException("매물 소유자 ID로 계약 요청 조회에 실패했습니다.");
+		}
+		return requests;
 	}
 
-	// 특정 매물에 대한 모든 요청 목록 조회
-	public List<ContractRequest> findAllByPropertyId(Long propertyId) {
-		return requests.values().stream()
-			.filter(request -> request.getPropertyId().equals(propertyId))
-			.collect(Collectors.toList());
-	}
-
-	// 상태별 요청 목록 조회
-	public List<ContractRequest> findByStatus(RequestStatus status) {
-		return requests.values().stream()
-			.filter(request -> request.getStatus().equals(status))
-			.collect(Collectors.toList());
-	}
-
-	public List<ContractRequest> findAll() {
-		return new ArrayList<>(requests.values());
-	}
-
-	public void deleteAll() {
-		requests.clear();
+	private ContractRequest mapContractRequest(ResultSet rs) throws SQLException {
+		return new ContractRequest(
+			rs.getLong("id"),
+			rs.getLong("requester_id"),
+			rs.getLong("property_id")
+		);
 	}
 } 
