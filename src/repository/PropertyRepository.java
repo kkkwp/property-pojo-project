@@ -1,110 +1,179 @@
 package repository;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import config.DBConnectionManager;
+import domain.Location;
 import domain.Price;
 import domain.Property;
-import domain.User;
 import domain.enums.DealType;
-import domain.enums.PropertyStatus;
 import domain.enums.PropertyType;
 import dto.PropertyFilter;
 
 public class PropertyRepository {
-	private static final Map<Long, Property> properties = new HashMap<>();
-	private static long sequence = 0L;
-
 	public Property save(Property property) {
-		Property newProperty = new Property(++sequence, property.getOwnerId(), property.getLocation(),
-			property.getPrice(), property.getPropertyType(), property.getDealType());
-		properties.put(newProperty.getId(), newProperty);
-		return newProperty;
+		if (property.getId() == null)
+			return insert(property);
+		else
+			return update(property);
+	}
+
+	private Property insert(Property property) {
+		return property;
+	}
+
+	private Property update(Property property) {
+		return property;
 	}
 
 	public Optional<Property> findById(Long id) {
-		return Optional.ofNullable(properties.get(id));
-	}
-
-	// 필터링 메서드
-	// TODO: 소유자 필터 (선택적) 구현
-	public List<Property> findByFilter(PropertyFilter filter) {
-		return properties.values().stream()
-			// 계약 완료가 아닌 매물만 기본으로 조회
-			.filter(property -> property.getStatus() != PropertyStatus.COMPLETED)
-			.filter(property -> filterByCity(property, filter.getCity()))
-			.filter(property -> filterByDistrict(property, filter.getDistrict()))
-			.filter(property -> filterByPropertyTypes(property, filter.getPropertyTypes()))
-			.filter(property -> filterByDealTypes(property, filter.getDealTypes()))
-			.filter(property -> filterByPrice(property, filter.getMinPrice(), filter.getMaxPrice()))
-			.collect(Collectors.toList());
-	}
-
-	private boolean filterByCity(Property property, String city) {
-		return city == null || property.getLocation().getCity().equals(city);
-	}
-
-	private boolean filterByDistrict(Property property, String district) {
-		return district == null || property.getLocation().getDistrict().equals(district);
-	}
-
-	private boolean filterByPropertyTypes(Property property, List<PropertyType> propertyTypes) {
-		if (propertyTypes == null || propertyTypes.isEmpty())
-			return true;
-		return propertyTypes.contains(property.getPropertyType());
-	}
-
-	private boolean filterByDealTypes(Property property, List<DealType> dealTypes) {
-		if (dealTypes == null || dealTypes.isEmpty())
-			return true;
-		return dealTypes.contains(property.getDealType());
-	}
-
-	private boolean filterByPrice(Property property, long minPrice, long maxPrice) {
-		Price price = property.getPrice();
-
-		// 월세면 월세 비교, 그 외(전세나 매매)는 보증금 비교
-		long targetPrice = 0;
-		switch (property.getDealType()) {
-			case MONTHLY -> targetPrice = price.getMonthlyRent();
-			default -> targetPrice = price.getDeposit();
+		String sql = "SELECT * FROM properties WHERE id = ?";
+		try (Connection conn = DBConnectionManager.getConnection();
+			 PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setLong(1, id);
+			try (ResultSet rs = stmt.executeQuery()) {
+				if (rs.next())
+					return Optional.of(mapProperty(rs));
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException("ID로 매물 조회에 실패했습니다.");
 		}
-
-		boolean minOk = (minPrice == 0 || targetPrice >= minPrice);
-		boolean maxOk = (maxPrice == 0 || targetPrice <= maxPrice);
-		return minOk && maxOk;
+		return Optional.empty();
 	}
 
-	// 한 임대인이 소유한 매물 전체 조회
-	public List<Property> findByOwner(User owner) {
-		return properties.values().stream()
-			.filter(property -> property.getOwnerId().equals(owner.getId()))
-			.collect(Collectors.toList());
+	public List<Property> findByFilter(PropertyFilter filter) {
+		// 계약 완료가 아닌 매물만 기본으로 조회
+		StringBuilder sb = new StringBuilder("SELECT * FROM properties WHERE status != 'COMPLETED'");
+		List<Object> params = new ArrayList<>();
+		filterByLocation(sb, params, filter);
+		filterByPropertyTypes(sb, params, filter);
+		filterByDealTypes(sb, params, filter);
+		filterByPrice(sb, params, filter);
+
+		List<Property> result = new ArrayList<>();
+		try (Connection conn = DBConnectionManager.getConnection();
+			 PreparedStatement stmt = conn.prepareStatement(sb.toString())) {
+			for (int i = 0; i < params.size(); i++)
+				stmt.setObject(i + 1, params.get(i));
+
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next())
+					result.add(mapProperty(rs));
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException("필터로 매물 조회에 실패했습니다.");
+		}
+		return result;
 	}
 
-	// 거래 가능한 매물만 반환
-	public List<Property> findAvailableProperties(PropertyStatus status) {
-		return properties.values().stream()
-			.filter(property -> property.getStatus().equals(PropertyStatus.AVAILABLE))
-			.collect(Collectors.toList());
+	private void filterByLocation(StringBuilder sb, List<Object> params, PropertyFilter filter) {
+		if (filter.getCity() != null) {
+			sb.append(" AND city = ?");
+			params.add(filter.getCity());
+		}
+		if (filter.getDistrict() != null) {
+			sb.append(" AND district = ?");
+			params.add(filter.getDistrict());
+		}
 	}
 
-	public List<Property> findAll() {
-		return new ArrayList<>(properties.values());
+	private void filterByPropertyTypes(StringBuilder sb, List<Object> params, PropertyFilter filter) {
+		List<PropertyType> propertyTypes = filter.getPropertyTypes();
+		if (propertyTypes != null && !propertyTypes.isEmpty()) {
+			sb.append(" AND property_type IN (");
+			sb.append(String.join(",", Collections.nCopies(propertyTypes.size(), "?")));
+			sb.append(")");
+			for (PropertyType type : propertyTypes)
+				params.add(type.name());
+		}
+	}
+
+	private void filterByDealTypes(StringBuilder sb, List<Object> params, PropertyFilter filter) {
+		List<DealType> dealTypes = filter.getDealTypes();
+		if (dealTypes != null && !dealTypes.isEmpty()) {
+			sb.append(" AND deal_type IN (");
+			sb.append(String.join(",", Collections.nCopies(dealTypes.size(), "?")));
+			sb.append(")");
+			for (DealType type : dealTypes)
+				params.add(type.name());
+		}
+	}
+
+	private void filterByPrice(StringBuilder sb, List<Object> params, PropertyFilter filter) {
+		long minPrice = filter.getMinPrice();
+		long maxPrice = filter.getMaxPrice();
+
+		// 가격 조건이 없으면 아무것도 하지 않음
+		if (minPrice <= 0 && maxPrice <= 0)
+			return;
+
+		if (minPrice > 0 && maxPrice > 0) {
+			sb.append(
+				" AND ((deal_type = 'MONTHLY' AND monthly_rent BETWEEN ? AND ?) OR (deal_type != 'MONTHLY' AND deposit BETWEEN ? AND ?))");
+			params.add(minPrice);
+			params.add(maxPrice);
+			params.add(minPrice);
+			params.add(maxPrice);
+		} else if (minPrice > 0) {
+			sb.append(
+				" AND ((deal_type = 'MONTHLY' AND monthly_rent >= ?) OR (deal_type != 'MONTHLY' AND deposit >= ?))");
+			params.add(minPrice);
+			params.add(minPrice);
+		} else { // maxPrice > 0
+			sb.append(
+				" AND ((deal_type = 'MONTHLY' AND monthly_rent <= ?) OR (deal_type != 'MONTHLY' AND deposit <= ?))");
+			params.add(maxPrice);
+			params.add(maxPrice);
+		}
 	}
 
 	// 소유자 ID로 매물 조회
 	public List<Property> findByOwnerId(Long ownerId) {
-		return properties.values().stream()
-			.filter(property -> property.getOwnerId().equals(ownerId))
-			.collect(Collectors.toList());
+		String sql = "SELECT * FROM properties WHERE owner_id = ?";
+		List<Property> properties = new ArrayList<>();
+		try (Connection conn = DBConnectionManager.getConnection();
+			 PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setLong(1, ownerId);
+			try (ResultSet rs = stmt.executeQuery()) {
+				while (rs.next())
+					properties.add(mapProperty(rs));
+			}
+		} catch (SQLException e) {
+			throw new RuntimeException("소유자 ID로 매물 조회에 실패했습니다.");
+		}
+		return properties;
 	}
 
 	public void deleteById(Long id) {
-		properties.remove(id);
+		String sql = "DELETE FROM properties WHERE id = ?";
+		try (Connection conn = DBConnectionManager.getConnection();
+			 PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setLong(1, id);
+			stmt.executeUpdate();
+		} catch (SQLException e) {
+			throw new RuntimeException("매물 삭제에 실패했습니다.");
+		}
+	}
+
+	private Property mapProperty(ResultSet rs) throws SQLException {
+		// DB 조회 결과를 Property 객체로 변환
+		Location location = new Location(rs.getString("city"), rs.getString("district"));
+		Price price = new Price(rs.getLong("deposit"), rs.getLong("monthly_rent"));
+
+		return new Property(
+			rs.getLong("id"),
+			rs.getLong("owner_id"),
+			location,
+			price,
+			PropertyType.valueOf(rs.getString("property_type")),
+			DealType.valueOf(rs.getString("deal_type"))
+		);
 	}
 }
