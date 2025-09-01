@@ -36,7 +36,6 @@ DB_PASSWORD=
 
 ### 2. docker 이미지 빌드
 ```shell
-cd 프로젝트 경로
 docker build -t java-project .
 ```
 
