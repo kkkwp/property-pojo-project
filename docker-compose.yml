@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: java-project-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    volumes:
+      - db-data:/var/lib/mysql
+      # 컨테이너가 처음 생성될 때 아래 경로의 .sql 파일들을 실행하여 DB를 초기화
+      - ./resources/sql:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+
+  app:
+    build: .
+    container_name: java-project-app
+    depends_on:
+      - db
+    environment:
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+volumes:
+  db-data:

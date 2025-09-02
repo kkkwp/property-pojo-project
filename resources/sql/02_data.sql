@@ -1,3 +1,7 @@
+-- Docker 컨테이너의 터미널 환경에서 MySQL 클라이언트가 utf8mb4로 통신하도록 명시적으로 설정
+SET NAMES utf8mb4;
+SET CHARACTER SET utf8mb4;
+
 USE stigma;
 
 INSERT INTO users (email, role, phone_number, address)
