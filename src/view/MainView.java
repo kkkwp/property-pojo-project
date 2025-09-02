@@ -42,7 +42,7 @@ public class MainView {
 				System.out.print("\u001B[33m📧 이메일 입력: \u001B[0m");
 
 				// 이메일을 입력 받는다.
-				String email = scanner.nextLine();
+				String email = scanner.nextLine().trim();
 
 				// 이메일을 검증한다.
 				Optional<User> userOptional = authService.login(email);
