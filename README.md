@@ -30,18 +30,21 @@ git clone https://github.com/stigma-property/java-project.git
 
 ### 2. 최상위 디렉토리에 `.env` 파일 생성
 ```shell
+MYSQL_ROOT_PASSWORD=
+MYSQL_DATABASE=
+DB_URL=
 DB_USERNAME=
 DB_PASSWORD=
 ```
 
 ### 2. docker 이미지 빌드
 ```shell
-docker build -t java-project .
+docker-compose up --build -d
 ```
 
 ### 3. docker 컨테이너 실행
 ```shell
-docker run --rm -it --env-file ./.env java-project
+docker run app
 ```
 
 <br/>
