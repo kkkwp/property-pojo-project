@@ -23,13 +23,13 @@ public class ContractRequestRepository {
 	}
 
 	private ContractRequest insert(ContractRequest request) {
-		String sql = "INSERT INTO contract_requests (requester_id, property_id, status, submitted_at) VALUES (?, ?, ?, ?)";
+		String sql = "INSERT INTO contract_requests (requester_id, property_id, status, created_at) VALUES (?, ?, ?, ?)";
 		try (Connection conn = DBConnectionManager.getConnection();
 			 PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 			stmt.setLong(1, request.getRequesterId());
 			stmt.setLong(2, request.getPropertyId());
 			stmt.setString(3, request.getStatus().name());
-			stmt.setTimestamp(4, Timestamp.valueOf(request.getSubmittedAt()));
+			stmt.setTimestamp(4, Timestamp.valueOf(request.getCreatedAt()));
 			stmt.executeUpdate();
 
 			try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {

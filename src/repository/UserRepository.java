@@ -14,7 +14,7 @@ import domain.enums.Role;
 public class UserRepository {
 	// 회원 가입
 	public User save(User user) {
-		String sql = "INSERT INTO users (email, role, contact, address) VALUES (?, ?, ?, ?)";
+		String sql = "INSERT INTO users (email, role, phone_number, address) VALUES (?, ?, ?, ?)";
 		try (Connection conn = DBConnectionManager.getConnection();
 			 PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 			stmt.setString(1, user.getEmail());

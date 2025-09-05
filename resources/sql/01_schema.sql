@@ -10,8 +10,7 @@ CREATE TABLE users
     email        VARCHAR(255) NOT NULL UNIQUE,
     role         VARCHAR(50)  NOT NULL,
     phone_number VARCHAR(255),
-    address      VARCHAR(255),
-    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    address      VARCHAR(255)
 );
 
 CREATE TABLE properties
@@ -25,7 +24,7 @@ CREATE TABLE properties
     property_type VARCHAR(50)  NOT NULL,
     deal_type     VARCHAR(50)  NOT NULL,
     status        VARCHAR(50)  NOT NULL,
-    created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at    TIMESTAMP NULL DEFAULT NULL,
     FOREIGN KEY (owner_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
@@ -35,7 +34,21 @@ CREATE TABLE contract_requests
     requester_id BIGINT      NOT NULL,
     property_id  BIGINT      NOT NULL,
     status       VARCHAR(50) NOT NULL,
-    submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at   TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (requester_id) REFERENCES users (id),
     FOREIGN KEY (property_id) REFERENCES properties (id)
+);
+
+CREATE TABLE contracts
+(
+    id                  BIGINT PRIMARY KEY,
+    lessor_id           BIGINT      NOT NULL,
+    lessee_id           BIGINT      NOT NULL,
+    contract_date       TIMESTAMP,
+    move_date           TIMESTAMP,
+    status              VARCHAR(50) NOT NULL,
+    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (id) REFERENCES contract_requests (id) ON DELETE CASCADE,
+    FOREIGN KEY (lessor_id) REFERENCES users (id),
+    FOREIGN KEY (lessee_id) REFERENCES users (id)
 );

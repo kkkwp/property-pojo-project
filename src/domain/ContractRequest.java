@@ -9,14 +9,14 @@ public class ContractRequest {
 	private final Long requesterId;
 	private final Long propertyId;
 	private RequestStatus status;
-	private LocalDateTime submittedAt;
+	private final LocalDateTime createdAt;
 
 	public ContractRequest(Long id, Long requesterId, Long propertyId) {
 		this.id = id;
 		this.requesterId = requesterId;
 		this.propertyId = propertyId;
 		this.status = RequestStatus.REQUESTED; // 생성 시 기본 상태는 <요청 중>
-		this.submittedAt = LocalDateTime.now(); // 생성 시 기본 시간은 <현재 시간>
+		this.createdAt = LocalDateTime.now(); // 생성 시 기본 시간은 <현재 시간>
 	}
 
 	// Getter 메서드들
@@ -36,8 +36,8 @@ public class ContractRequest {
 		return status;
 	}
 
-	public LocalDateTime getSubmittedAt() {
-		return submittedAt;
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
 	}
 
 	// Setter 메서드들
@@ -52,6 +52,6 @@ public class ContractRequest {
 	@Override
 	public String toString() {
 		return String.format("요청번호: %d | 요청자 ID: %s | 매물 ID: %s | 요청 상태: [%s] | 요청 시간: %s",
-			id, requesterId, propertyId, status, submittedAt);
+			id, requesterId, propertyId, status, createdAt);
 	}
 }

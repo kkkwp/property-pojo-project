@@ -1,5 +1,8 @@
 package domain;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 import domain.enums.DealType;
 import domain.enums.PropertyStatus;
 import domain.enums.PropertyType;
@@ -12,6 +15,7 @@ public class Property {
 	private final PropertyType propertyType; // 집 유형 (아파트/빌라/오피스텔/원룸)
 	private DealType dealType; // 거래 유형 (전세/월세/매매) - 수정 가능하도록 final 제거
 	private PropertyStatus status; // 매물 상태
+	private LocalDateTime deletedAt;
 
 	public Property(Long id, Long ownerId, Location location, Price price, PropertyType propertyType,
 		DealType dealType) {
@@ -22,6 +26,7 @@ public class Property {
 		this.propertyType = propertyType;
 		this.dealType = dealType;
 		this.status = PropertyStatus.AVAILABLE; // 생성 시 기본 상태는 <거래 가능>
+		this.deletedAt = null;
 	}
 
 	// Getter 메서드들
@@ -53,9 +58,17 @@ public class Property {
 		return status;
 	}
 
+	public LocalDateTime getDeletedAt() {
+		return deletedAt;
+	}
+
 	// Setter 메서드들
 	public void setStatus(PropertyStatus status) {
 		this.status = status;
+	}
+
+	public void setDeletedAt() {
+		this.deletedAt = LocalDateTime.now();
 	}
 
 	// 거래 유형 변경

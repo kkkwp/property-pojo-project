@@ -1,53 +1,49 @@
 package domain;
 
+import java.time.LocalDateTime;
+
 import domain.enums.ContractStatus;
 
 public class Contract {
-    private final String id;
-    private final String contractDate;
-    private final String moveInDate;
+    private final Long id;
+    private final Long lessorId;
+    private final Long lesseeId;
+    private LocalDateTime contractDate;
+    private LocalDateTime moveDate;
     private ContractStatus status;
-    private final Long propertyId;
-    private final Long requesterId;
-    private final ContractRequest request;
     
-    public Contract(String id, String contractDate, String moveInDate, ContractRequest request) {
+    public Contract(Long id, Long lessorId, Long lesseeId, LocalDateTime contractDate, LocalDateTime moveDate, ContractStatus status) {
         this.id = id;
+        this.lessorId = lessorId;
+        this.lesseeId = lesseeId;
         this.contractDate = contractDate;
-        this.moveInDate = moveInDate;
+        this.moveDate = moveDate;
         this.status = ContractStatus.PENDING;  // 계약 진행 중 상태로 시작
-        this.request = request;
-        this.propertyId = request.getPropertyId();
-        this.requesterId = request.getRequesterId();
     }
     
     // Getter 메서드들
-    public String getId() {
+    public Long getId() {
         return id;
     }
-    
-    public String getContractDate() {
+
+    public Long getLessorId() {
+        return lessorId;
+    }
+
+    public Long getLesseeId() {
+        return lesseeId;
+    }
+
+    public LocalDateTime getContractDate() {
         return contractDate;
     }
-    
-    public String getMoveInDate() {
-        return moveInDate;
+
+    public LocalDateTime getMoveDate() {
+        return moveDate;
     }
-    
+
     public ContractStatus getStatus() {
         return status;
-    }
-    
-    public Long getPropertyId() {
-        return propertyId;
-    }
-    
-    public Long getRequesterId() {
-        return requesterId;
-    }
-    
-    public ContractRequest getRequest() {
-        return request;
     }
     
     // Setter 메서드들
@@ -92,18 +88,5 @@ public class Contract {
     
     public boolean isCancelled() {
         return this.status == ContractStatus.CANCELLED;
-    }
-    
-    @Override
-    public String toString() {
-        return "Contract{" +
-            "id='" + id + '\'' +
-            ", contractDate='" + contractDate + '\'' +
-            ", moveInDate='" + moveInDate + '\'' +
-            ", status=" + status +
-            ", propertyId=" + propertyId +
-            ", requesterId=" + requesterId +
-            ", request=" + request +
-            '}';
     }
 }

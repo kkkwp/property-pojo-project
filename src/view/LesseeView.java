@@ -720,7 +720,7 @@ public class LesseeView {
 		StringBuilder content = new StringBuilder();
 		content.append("=== 계약 요청 상세 정보 ===\n\n");
 		content.append("📋 요청 번호: " + request.getId() + "\n");
-		content.append("📅 요청 일시: " + UIHelper.formatDateTime(request.getSubmittedAt()) + "\n");
+		content.append("📅 요청 일시: " + UIHelper.formatDateTime(request.getCreatedAt()) + "\n");
 		content.append("📊 요청 상태: " + UIHelper.getRequestStatusDisplayName(request.getStatus()) + "\n\n");
 		
 		content.append("=== 매물 정보 ===\n");

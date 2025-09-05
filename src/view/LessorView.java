@@ -989,7 +989,7 @@ public class LessorView {
 		StringBuilder content = new StringBuilder();
 		content.append("=== 계약 요청 상세 정보 ===\n\n");
 		content.append("📋 요청 번호: " + request.getId() + "\n");
-		content.append("📅 요청 날짜: " + UIHelper.formatDateTime(request.getSubmittedAt()) + "\n");
+		content.append("📅 요청 날짜: " + UIHelper.formatDateTime(request.getCreatedAt()) + "\n");
 		content.append(
 			"📊 요청 상태: " + statusEmoji + " " + UIHelper.getRequestStatusDisplayName(request.getStatus()) + "\n\n");
 
