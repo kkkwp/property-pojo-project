@@ -37,7 +37,8 @@ public class LesseeView {
 				"\n" +
 				"1. 매물 조회\n" +
 				"2. 계약 요청 조회\n" +
-				"3. 로그아웃";
+				"3. 완료된 계약 조회\n" +
+				"4. 로그아웃";
 
 			UIHelper.printBox(lessee.getEmail(), "임차인 메뉴", menuContent);
 			System.out.print("\u001B[33m선택: \u001B[0m");
@@ -51,6 +52,9 @@ public class LesseeView {
 					viewMyContractRequests();
 					break;
 				case "3":
+					viewCompletedContracts();
+					break;
+				case "4":
 					System.out.println("로그아웃 중...");
 					return;
 				default:
@@ -619,7 +623,10 @@ public class LesseeView {
 		UIHelper.clearScreen();
 		UIHelper.printHeader("부동산 플랫폼");
 
-		List<ContractRequest> myRequests = contractService.findContractRequestsByUserId(lessee.getId());
+		List<ContractRequest> myRequests = contractService.findContractRequestsByUserId(lessee.getId())
+			.stream()
+			.filter(request -> request.getStatus() != domain.enums.RequestStatus.COMPLETED)
+			.toList();
 
 		if (myRequests.isEmpty()) {
 			String content = "내 계약 요청 조회\n\n" +
@@ -801,8 +808,17 @@ public class LesseeView {
 		// 연락 애니메이션 시작
 		showContactingAnimation();
 
-		// 계약 완료 처리 (실제로는 서비스에서 처리해야 함)
-		// contractService.completeContract(request.getId());
+		// 계약 완료 처리
+		try {
+			contractService.completeContract(lessee, request.getId());
+		} catch (Exception e) {
+			UIHelper.clearScreen();
+			UIHelper.printHeader("부동산 플랫폼");
+			System.out.println("❌ 계약 완료 처리 중 오류가 발생했습니다: " + e.getMessage());
+			System.out.print("계속하려면 Enter를 누르세요: ");
+			scanner.nextLine();
+			return;
+		}
 
 		// 완료 메시지 표시
 		showContractCompleted(request, property);
@@ -871,6 +887,116 @@ public class LesseeView {
 		if (choice.equals("0")) {
 			// 메인 메뉴로 돌아가기
 			return;
+		}
+	}
+
+	// ======================================= 완료된 계약 조회 =======================================
+	// 완료된 계약 조회
+	private void viewCompletedContracts() {
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
+
+		List<ContractRequest> myRequests = contractService.findContractRequestsByUserId(lessee.getId());
+		List<ContractRequest> completedRequests = myRequests.stream()
+			.filter(request -> request.getStatus() == domain.enums.RequestStatus.COMPLETED)
+			.toList();
+
+		if (completedRequests.isEmpty()) {
+			String content = "완료된 계약 조회\n\n" +
+				"완료된 계약이 없습니다.\n\n" +
+				"계약이 완료되면 여기에 표시됩니다.";
+
+			UIHelper.printBox(lessee.getEmail(), "완료된 계약 조회", content);
+			System.out.print("계속하려면 Enter를 누르세요: ");
+			scanner.nextLine();
+			return;
+		}
+
+		StringBuilder content = new StringBuilder();
+		content.append("완료된 계약 목록 (" + completedRequests.size() + "개)\n\n");
+
+		for (int i = 0; i < completedRequests.size(); i++) {
+			ContractRequest request = completedRequests.get(i);
+			Property property = propertyService.findPropertyById(request.getPropertyId());
+
+			content.append(String.format("%d. %s %s %s > 🎉 계약 완료\n",
+				(i + 1),
+				property.getLocation().getCity() + " " + property.getLocation().getDistrict(),
+				UIHelper.getPropertyTypeDisplayName(property.getPropertyType()),
+				UIHelper.getDealTypeDisplayName(property.getDealType())
+			));
+		}
+
+		content.append("\n상세보기를 원하는 계약 번호를 선택하세요.\n");
+		content.append("0: 이전 메뉴로 돌아가기");
+
+		UIHelper.printBox(lessee.getEmail(), "완료된 계약 조회", content.toString());
+		System.out.print("\u001B[33m선택: \u001B[0m");
+
+		String choice = scanner.nextLine().trim();
+		if (choice.equals("0"))
+			return;
+
+		try {
+			int requestIndex = Integer.parseInt(choice) - 1;
+			if (requestIndex >= 0 && requestIndex < completedRequests.size()) {
+				showCompletedContractDetail(completedRequests.get(requestIndex));
+			} else {
+				System.out.println("❌ 잘못된 번호입니다. 다시 선택해주세요.");
+				System.out.print("계속하려면 Enter를 누르세요: ");
+				scanner.nextLine();
+			}
+		} catch (NumberFormatException e) {
+			System.out.println("❌ 숫자를 입력해주세요.");
+			System.out.print("계속하려면 Enter를 누르세요: ");
+			scanner.nextLine();
+		}
+	}
+
+	// 완료된 계약 상세보기
+	private void showCompletedContractDetail(ContractRequest request) {
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
+
+		Property property = propertyService.findPropertyById(request.getPropertyId());
+
+		StringBuilder content = new StringBuilder();
+		content.append("=== 완료된 계약 상세 정보 ===\n\n");
+		content.append("📋 계약 번호: " + request.getId() + "\n");
+		content.append("📅 요청 날짜: " + UIHelper.formatDateTime(request.getCreatedAt()) + "\n");
+		content.append("📊 계약 상태: 🎉 계약 완료\n\n");
+
+		content.append("=== 매물 정보 ===\n");
+		content.append("🏠 매물 유형: " + UIHelper.getPropertyTypeDisplayName(property.getPropertyType()) + "\n");
+		content.append("📍 위치: " + property.getLocation().getCity() + " " + property.getLocation().getDistrict() + "\n");
+		content.append("💰 거래 유형: " + UIHelper.getDealTypeDisplayName(property.getDealType()) + "\n");
+		content.append("💵 가격: " + UIHelper.formatPriceForDisplay(property.getPrice(), property.getDealType()) + "\n");
+		content.append("📊 매물 상태: " + UIHelper.getPropertyStatusDisplayName(property.getStatus()) + "\n");
+
+		content.append("\n=== 임대인 정보 ===\n");
+		content.append("📧 이메일: lessor@test\n");
+		content.append("📞 전화번호: 010-1111-2222\n");
+		content.append("📍 주소: 서울특별시 강남구 테헤란로 123\n");
+
+		content.append("\n1: 완료된 계약 목록으로 돌아가기\n");
+		content.append("0: 메인 메뉴로 돌아가기");
+
+		UIHelper.printBox(lessee.getEmail(), "완료된 계약 상세보기", content.toString());
+		System.out.print("\u001B[33m선택: \u001B[0m");
+
+		String choice = scanner.nextLine().trim();
+
+		switch (choice) {
+			case "1":
+				viewCompletedContracts();
+				break;
+			case "0":
+				return;
+			default:
+				System.out.println("❌ 잘못된 선택입니다.");
+				System.out.print("계속하려면 Enter를 누르세요: ");
+				scanner.nextLine();
+				break;
 		}
 	}
 }

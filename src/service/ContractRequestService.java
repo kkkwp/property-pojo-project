@@ -92,6 +92,36 @@ public class ContractRequestService implements IContractRequestService {
 		return requestRepository.save(request);
 	}
 
+	@Override
+	public ContractRequest completeContract(User lessee, Long requestId) {
+		// 1. 사용자가 임차인인지 확인
+		if (!lessee.isLessee())
+			throw new CustomException(ErrorCode.NO_AUTHORITY, "임차인만 계약을 완료할 수 있습니다.");
+		
+		// 2. 계약 요청 조회
+		ContractRequest request = requestRepository.findById(requestId)
+			.orElseThrow(() -> new CustomException(ErrorCode.REQUEST_NOT_FOUND));
+		
+		// 3. 요청자가 임차인인지 확인
+		if (!request.getRequesterId().equals(lessee.getId()))
+			throw new CustomException(ErrorCode.NO_AUTHORITY, "본인의 계약 요청만 완료할 수 있습니다.");
+		
+		// 4. 요청 상태가 APPROVED인지 확인
+		if (request.getStatus() != RequestStatus.APPROVED)
+			throw new CustomException(ErrorCode.INVALID_REQUEST_STATUS, "승인된 계약 요청만 완료할 수 있습니다.");
+		
+		// 5. 요청 상태를 COMPLETED로 변경
+		request.setStatus(RequestStatus.COMPLETED);
+		
+		// 6. 매물 상태를 COMPLETED로 변경
+		Property property = propertyRepository.findById(request.getPropertyId())
+			.orElseThrow(() -> new CustomException(ErrorCode.PROPERTY_NOT_FOUND));
+		property.setStatus(PropertyStatus.COMPLETED);
+		propertyRepository.save(property);
+		
+		return requestRepository.save(request);
+	}
+
 	// 요청 조회 및 권한 검증을 처리하는 공통 로직 (중복 제거)
 	private ContractRequest findAndValidateRequest(User lessor, Long requestId) {
 		// 1. 사용자가 임대인인지 확인
