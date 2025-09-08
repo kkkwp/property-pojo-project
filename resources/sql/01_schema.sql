@@ -19,12 +19,12 @@ CREATE TABLE properties
     owner_id      BIGINT       NOT NULL,
     city          VARCHAR(100) NOT NULL,
     district      VARCHAR(100) NOT NULL,
-    deposit       BIGINT    DEFAULT 0,
-    monthly_rent  BIGINT    DEFAULT 0,
+    deposit       BIGINT            DEFAULT 0,
+    monthly_rent  BIGINT            DEFAULT 0,
     property_type VARCHAR(50)  NOT NULL,
     deal_type     VARCHAR(50)  NOT NULL,
     status        VARCHAR(50)  NOT NULL,
-    deleted_at    TIMESTAMP NULL DEFAULT NULL,
+    deleted_at    TIMESTAMP    NULL DEFAULT NULL,
     FOREIGN KEY (owner_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
@@ -41,13 +41,11 @@ CREATE TABLE contract_requests
 
 CREATE TABLE contracts
 (
-    id                  BIGINT PRIMARY KEY,
-    lessor_id           BIGINT      NOT NULL,
-    lessee_id           BIGINT      NOT NULL,
-    contract_date       TIMESTAMP,
-    move_date           TIMESTAMP,
-    status              VARCHAR(50) NOT NULL,
-    created_at          TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    id         BIGINT PRIMARY KEY,
+    lessor_id  BIGINT      NOT NULL,
+    lessee_id  BIGINT      NOT NULL,
+    status     VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (id) REFERENCES contract_requests (id) ON DELETE CASCADE,
     FOREIGN KEY (lessor_id) REFERENCES users (id),
     FOREIGN KEY (lessee_id) REFERENCES users (id)
