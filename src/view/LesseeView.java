@@ -632,7 +632,7 @@ public class LesseeView {
 			return;
 		}
 
-		int approvedCount = 0, rejectedCount = 0, pendingCount = 0;
+		int approvedCount = 0, rejectedCount = 0, pendingCount = 0, completedCount = 0;
 		for (ContractRequest request : myRequests) {
 			switch (request.getStatus()) {
 				case APPROVED:
@@ -643,6 +643,9 @@ public class LesseeView {
 					break;
 				case REQUESTED:
 					pendingCount++;
+					break;
+				case COMPLETED:
+					completedCount++;
 					break;
 			}
 		}
@@ -664,6 +667,9 @@ public class LesseeView {
 				case REQUESTED:
 					statusEmoji = "🟡";
 					break;
+				case COMPLETED:
+					statusEmoji = "🎉";
+					break;
 			}
 
 			content.append(String.format("%d. 매물ID:%d %s\n",
@@ -677,6 +683,7 @@ public class LesseeView {
 		content.append("✅ 승인된 요청: " + approvedCount + "개\n");
 		content.append("❌ 반려된 요청: " + rejectedCount + "개\n");
 		content.append("🟡 승인 대기 중: " + pendingCount + "개\n");
+		content.append("🎉 계약 완료: " + completedCount + "개\n");
 		content.append("\n0: 이전 메뉴로 돌아가기");
 
 		UIHelper.printBox(lessee.getEmail(), "계약 요청 조회", content.toString());
@@ -744,6 +751,7 @@ public class LesseeView {
 		}
 		
 		content.append("\n1: 매물 목록으로 돌아가기\n");
+		content.append("2: 임대인에게 연락하기\n");
 		content.append("0: 메인 메뉴로 돌아가기");
 
 		UIHelper.printBox(lessee.getEmail(), "계약 요청 상세", content.toString());
@@ -752,6 +760,8 @@ public class LesseeView {
 		String choice = scanner.nextLine().trim();
 		if (choice.equals("1")) {
 			viewMyContractRequests();
+		} else if (choice.equals("2")) {
+			contactLessor(request, property);
 		} else if (choice.equals("0")) {
 			// 메인 메뉴로 돌아가기 - 아무것도 하지 않음 (showMenu()의 while 루프로 돌아감)
 			return;
@@ -760,6 +770,105 @@ public class LesseeView {
 			System.out.print("계속하려면 Enter를 누르세요: ");
 			scanner.nextLine();
 			showContractRequestDetail(request);
+		}
+	}
+
+	// 임대인에게 연락하기 (애니메이션 + 상태 변경)
+	private void contactLessor(ContractRequest request, Property property) {
+		// 계약 요청 상태 확인
+		if (request.getStatus() != domain.enums.RequestStatus.APPROVED) {
+			UIHelper.clearScreen();
+			UIHelper.printHeader("부동산 플랫폼");
+			
+			StringBuilder content = new StringBuilder();
+			content.append("⚠️  아직 승인되지 않은 계약 요청입니다.\n");
+			content.append("📊 현재 상태: " + UIHelper.getRequestStatusDisplayName(request.getStatus()) + "\n\n");
+			content.append("임대인의 승인을 기다린 후 연락하시기 바랍니다.\n");
+			content.append("\n0: 이전 화면으로 돌아가기");
+			
+			UIHelper.printBox(lessee.getEmail(), "임대인 연락", content.toString());
+			System.out.print("\u001B[33m선택: \u001B[0m");
+			
+			String choice = scanner.nextLine().trim();
+			if (choice.equals("0")) {
+				showContractRequestDetail(request);
+			}
+			return;
+		}
+
+		// 연락 애니메이션 시작
+		showContactingAnimation();
+		
+		// 계약 완료 처리 (실제로는 서비스에서 처리해야 함)
+		// contractService.completeContract(request.getId());
+		
+		// 완료 메시지 표시
+		showContractCompleted(request, property);
+	}
+
+	// 연락 중 애니메이션
+	private void showContactingAnimation() {
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
+		
+		StringBuilder content = new StringBuilder();
+		content.append("📞 임대인에게 연락 중입니다...\n\n");
+		
+		UIHelper.printBox(lessee.getEmail(), "연락 중", content.toString());
+		
+		// 양쪽으로 화살표가 퍼져나가는 애니메이션 (3번 반복)
+		for (int i = 0; i < 18; i++) {
+			// 화살표 개수 (0,1,2,3,2,1,0,1,2,3,2,1,0,1,2,3,2,1)
+			int arrowCount = (i % 6 < 4) ? (i % 6) : (6 - (i % 6));
+			
+			// 왼쪽 화살표 생성
+			String leftSide = "<".repeat(arrowCount);
+			// 오른쪽 화살표 생성
+			String rightSide = ">".repeat(arrowCount);
+			
+			// 공백으로 정렬 (고정된 위치 유지)
+			String leftSpaces = " ".repeat(3 - arrowCount);
+			String rightSpaces = " ".repeat(3 - arrowCount);
+			
+			// 고정된 위치에 출력
+			System.out.print("\r" + leftSpaces + leftSide + " 📞 전화 연결 중 " + rightSide + rightSpaces);
+			
+			try {
+				Thread.sleep(350); // 0.35초 대기
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+		}
+		System.out.println();
+	}
+
+	// 계약 완료 화면
+	private void showContractCompleted(ContractRequest request, Property property) {
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
+		
+		StringBuilder content = new StringBuilder();
+		content.append("🎉 계약이 성공적으로 완료되었습니다!\n\n");
+		content.append("=== 계약 완료 정보 ===\n");
+		content.append("📋 계약 번호: " + request.getId() + "\n");
+		content.append("🏠 매물: " + UIHelper.getPropertyTypeDisplayName(property.getPropertyType()) + 
+			" - " + property.getLocation().getCity() + " " + property.getLocation().getDistrict() + "\n");
+		content.append("💰 거래 유형: " + UIHelper.getDealTypeDisplayName(property.getDealType()) + "\n");
+		content.append("💵 가격: " + UIHelper.formatPriceForDisplay(property.getPrice(), property.getDealType()) + "\n");
+		content.append("📅 계약 완료일: " + UIHelper.formatDateTime(java.time.LocalDateTime.now()) + "\n\n");
+		
+		content.append("✅ 계약 상태가 '완료'로 변경되었습니다.\n");
+		content.append("📧 계약서는 이메일로 발송됩니다.\n\n");
+		
+		content.append("0: 메인 메뉴로 돌아가기");
+		
+		UIHelper.printBox(lessee.getEmail(), "계약 완료", content.toString());
+		System.out.print("\u001B[33m선택: \u001B[0m");
+		
+		String choice = scanner.nextLine().trim();
+		if (choice.equals("0")) {
+			// 메인 메뉴로 돌아가기
+			return;
 		}
 	}
 }

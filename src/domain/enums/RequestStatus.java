@@ -1,5 +1,5 @@
 package domain.enums;
 
 public enum RequestStatus {
-	REQUESTED, APPROVED, REJECTED
+	REQUESTED, APPROVED, REJECTED, COMPLETED
 }

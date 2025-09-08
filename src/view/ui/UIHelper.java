@@ -215,6 +215,8 @@ public class UIHelper {
 				return "승인됨";
 			case REJECTED:
 				return "반려됨";
+			case COMPLETED:
+				return "계약 완료";
 			default:
 				return status.name();
 		}
