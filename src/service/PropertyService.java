@@ -68,8 +68,15 @@ public class PropertyService implements IPropertyService {
 		validator.validateOwner(property, lessor);
 		// 2. 매물 상태 확인 (계약 중이거나 완료된 매물은 수정 불가)
 		validator.validatePropertyStatus(property);
-		// 3. 매물 상태 변경
-		property.setStatus(request.getStatus());
+		// 3. 매물 정보 변경
+		if (request.getDealType() != null) {
+			property.setDealType(request.getDealType());
+		}
+		if (request.getDeposit() != null || request.getMonthlyRent() != null) {
+			long deposit = (request.getDeposit() != null) ? request.getDeposit() : property.getPrice().getDeposit();
+			long monthlyRent = (request.getMonthlyRent() != null) ? request.getMonthlyRent() : property.getPrice().getMonthlyRent();
+			property.setPrice(new domain.Price(deposit, monthlyRent));
+		}
 		// 4. 저장 및 반환
 		return propertyRepository.save(property);
 	}

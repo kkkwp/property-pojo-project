@@ -8,7 +8,7 @@ import domain.enums.PropertyStatus;
 import domain.enums.PropertyType;
 
 public class Property {
-	private final Long id;
+	private Long id;
 	private final Long ownerId; // 임대인 ID
 	private final Location location; // 지역 (시/군/구)
 	private Price price; // 가격 (보증금, 월세) - 수정 가능하도록 final 제거
@@ -63,6 +63,10 @@ public class Property {
 	}
 
 	// Setter 메서드들
+	public void setId(Long id) {
+		this.id = id;
+	}
+
 	public void setStatus(PropertyStatus status) {
 		this.status = status;
 	}

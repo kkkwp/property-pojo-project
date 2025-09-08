@@ -10,10 +10,10 @@ import domain.Price;
 import domain.Property;
 import domain.User;
 import domain.enums.DealType;
-import domain.enums.PropertyStatus;
 import domain.enums.PropertyType;
 import domain.enums.RequestStatus;
 import dto.PropertyCreateRequest;
+import dto.PropertyUpdateRequest;
 import repository.UserRepository;
 import service.IContractService;
 import service.IPropertyService;
@@ -584,6 +584,14 @@ public class LessorView {
 			}
 		}
 
+		try {
+			propertyService.updateProperty(lessor, property.getId(), new PropertyUpdateRequest(null, newPrice.getDeposit(), newPrice.getMonthlyRent()));
+		} catch (Exception e) {
+			System.out.println("❌ 가격 변경 중 오류가 발생했습니다: " + e.getMessage());
+			System.out.print("계속하려면 Enter를 누르세요: ");
+			scanner.nextLine();
+			return;
+		}
 		property.setPrice(newPrice);
 
 		UIHelper.clearScreen();
@@ -641,8 +649,6 @@ public class LessorView {
 				scanner.nextLine();
 				return;
 		}
-
-		property.setDealType(newDealType);
 
 		// 거래 유형 변경 후 새로운 가격 입력받기
 		UIHelper.clearScreen();
@@ -712,7 +718,15 @@ public class LessorView {
 			}
 		}
 
-		// 새로운 가격 설정
+		try {
+			propertyService.updateProperty(lessor, property.getId(), new dto.PropertyUpdateRequest(newDealType, newPrice.getDeposit(), newPrice.getMonthlyRent()));
+		} catch (Exception e) {
+			System.out.println("❌ 거래 유형 및 가격 변경 중 오류가 발생했습니다: " + e.getMessage());
+			System.out.print("계속하려면 Enter를 누르세요: ");
+			scanner.nextLine();
+			return;
+		}
+		property.setDealType(newDealType);
 		property.setPrice(newPrice);
 
 		UIHelper.clearScreen();

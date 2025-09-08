@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,11 +27,43 @@ public class PropertyRepository {
 	}
 
 	private Property insert(Property property) {
-		return property;
+		String sql = "INSERT INTO properties (owner_id, city, district, deposit, monthly_rent, property_type, deal_type, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+		try (Connection conn = DBConnectionManager.getConnection();
+			 PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+			stmt.setLong(1, property.getOwnerId());
+			stmt.setString(2, property.getLocation().getCity());
+			stmt.setString(3, property.getLocation().getDistrict());
+			stmt.setLong(4, property.getPrice().getDeposit());
+			stmt.setLong(5, property.getPrice().getMonthlyRent());
+			stmt.setString(6, property.getPropertyType().name());
+			stmt.setString(7, property.getDealType().name());
+			stmt.setString(8, property.getStatus().name());
+			stmt.executeUpdate();
+
+			try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+				if (generatedKeys.next())
+					property.setId(generatedKeys.getLong(1));
+			}
+			return property;
+		} catch (SQLException e) {
+			throw new RuntimeException("매물 저장에 실패했습니다.");
+		}
 	}
 
 	private Property update(Property property) {
-		return property;
+		String sql = "UPDATE properties SET deposit = ?, monthly_rent = ?, deal_type = ?, status = ? WHERE id = ?";
+		try (Connection conn = DBConnectionManager.getConnection();
+			 PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setLong(1, property.getPrice().getDeposit());
+			stmt.setLong(2, property.getPrice().getMonthlyRent());
+			stmt.setString(3, property.getDealType().name());
+			stmt.setString(4, property.getStatus().name());
+			stmt.setLong(5, property.getId());
+			stmt.executeUpdate();
+			return property;
+		} catch (SQLException e) {
+			throw new RuntimeException("매물 수정에 실패했습니다.");
+		}
 	}
 
 	public Optional<Property> findById(Long id) {
