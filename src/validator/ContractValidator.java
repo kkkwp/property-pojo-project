@@ -32,4 +32,9 @@ public class ContractValidator {
 		if (!property.getOwnerId().equals(lessor.getId()))
 			throw new CustomException(ErrorCode.NOT_OWNER, "자신의 매물에 대한 요청만 승인할 수 있습니다.");
 	}
+
+	public void validateApproved(RequestStatus requestStatus) {
+		if (!requestStatus.equals(RequestStatus.APPROVED))
+			throw new CustomException(ErrorCode.INVALID_REQUEST_STATUS);
+	}
 }
