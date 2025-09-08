@@ -6,7 +6,7 @@ USE stigma;
 
 INSERT INTO users (email, role, phone_number, address)
 VALUES ('lessor@test', 'LESSOR', '010-1111-2222', '서울특별시 강남구 테헤란로 123'),
-       ('lessee@test', 'USER', '010-3333-4444', '서울특별시 서초구 서초대로 456');
+       ('lessee@test', 'LESSEE', '010-3333-4444', '서울특별시 서초구 서초대로 456');
 
 INSERT INTO properties (owner_id, city, district, deposit, monthly_rent, property_type, deal_type, status)
 VALUES # 임대인 ID 1번의 매물들 (서울)
@@ -24,6 +24,3 @@ VALUES # 임대인 ID 1번의 매물들 (서울)
        # 저가 매물들
        (1, '경기도', '의정부시', 5000000, 300000, 'ONE_ROOM', 'MONTHLY', 'AVAILABLE');
 
--- contract_requests 테이블은 비워둠 (요청은 사용자가 생성)
--- 테이블 내용 전체 삭제
-TRUNCATE TABLE contract_requests;
