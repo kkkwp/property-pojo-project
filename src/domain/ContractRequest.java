@@ -11,12 +11,31 @@ public class ContractRequest {
 	private RequestStatus status;
 	private final LocalDateTime createdAt;
 
+	// 기본 생성자 (새 요청 생성 시)
+	public ContractRequest(Long requesterId, Long propertyId) {
+		this.id = null;
+		this.requesterId = requesterId;
+		this.propertyId = propertyId;
+		this.status = RequestStatus.REQUESTED; // 생성 시 기본 상태는 <요청 중>
+		this.createdAt = LocalDateTime.now(); // 생성 시 기본 시간은 <현재 시간>
+	}
+
+	// 3개 매개변수 생성자 (Service에서 사용)
 	public ContractRequest(Long id, Long requesterId, Long propertyId) {
 		this.id = id;
 		this.requesterId = requesterId;
 		this.propertyId = propertyId;
 		this.status = RequestStatus.REQUESTED; // 생성 시 기본 상태는 <요청 중>
 		this.createdAt = LocalDateTime.now(); // 생성 시 기본 시간은 <현재 시간>
+	}
+
+	// 전체 생성자 (데이터베이스에서 조회 시)
+	public ContractRequest(Long id, Long requesterId, Long propertyId, RequestStatus status, LocalDateTime createdAt) {
+		this.id = id;
+		this.requesterId = requesterId;
+		this.propertyId = propertyId;
+		this.status = status;
+		this.createdAt = createdAt;
 	}
 
 	// Getter 메서드들

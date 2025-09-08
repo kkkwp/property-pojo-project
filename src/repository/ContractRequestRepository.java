@@ -111,7 +111,9 @@ public class ContractRequestRepository {
 		return new ContractRequest(
 			rs.getLong("id"),
 			rs.getLong("requester_id"),
-			rs.getLong("property_id")
+			rs.getLong("property_id"),
+			domain.enums.RequestStatus.valueOf(rs.getString("status")),
+			rs.getTimestamp("created_at").toLocalDateTime()
 		);
 	}
 } 
