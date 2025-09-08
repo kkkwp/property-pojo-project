@@ -14,12 +14,12 @@ import repository.ContractRequestRepository;
 import repository.PropertyRepository;
 import validator.ContractValidator;
 
-public class ContractService implements IContractService {
+public class ContractRequestService implements IContractRequestService {
 	private final ContractRequestRepository requestRepository;
 	private final PropertyRepository propertyRepository;
 	private final ContractValidator validator;
 
-	public ContractService(ContractRequestRepository requestRepository, PropertyRepository propertyRepository,
+	public ContractRequestService(ContractRequestRepository requestRepository, PropertyRepository propertyRepository,
 		ContractValidator validator) {
 		this.requestRepository = requestRepository;
 		this.propertyRepository = propertyRepository;

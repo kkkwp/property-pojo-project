@@ -2,9 +2,9 @@ import repository.ContractRequestRepository;
 import repository.PropertyRepository;
 import repository.UserRepository;
 import service.AuthService;
-import service.ContractService;
+import service.ContractRequestService;
 import service.IAuthService;
-import service.IContractService;
+import service.IContractRequestService;
 import service.IPropertyService;
 import service.PropertyService;
 import validator.AuthValidator;
@@ -39,7 +39,8 @@ public class Main {
 		// Service 생성
 		IAuthService authService = new AuthService(userRepository, authValidator);
 		IPropertyService propertyService = new PropertyService(propertyRepository, userRepository, propertyValidator);
-		IContractService contractService = new ContractService(contractRequestRepository, propertyRepository,
+		IContractRequestService contractService = new ContractRequestService(contractRequestRepository,
+			propertyRepository,
 			contractValidator);
 
 		// 메인 뷰 시작

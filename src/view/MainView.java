@@ -7,7 +7,7 @@ import domain.User;
 import domain.enums.Role;
 import repository.UserRepository;
 import service.IAuthService;
-import service.IContractService;
+import service.IContractRequestService;
 import service.IPropertyService;
 import view.ui.UIHelper;
 
@@ -15,10 +15,10 @@ public class MainView {
 	private final Scanner scanner;
 	private final IAuthService authService;
 	private final IPropertyService propertyService;
-	private final IContractService contractService;
+	private final IContractRequestService contractService;
 	private final UserRepository userRepository;
 
-	public MainView(IAuthService authService, IPropertyService propertyService, IContractService contractService,
+	public MainView(IAuthService authService, IPropertyService propertyService, IContractRequestService contractService,
 		UserRepository userRepository) {
 		this.scanner = new Scanner(System.in);
 		this.authService = authService;
@@ -94,7 +94,7 @@ public class MainView {
 				System.out.println();
 				System.out.print("로그인 화면으로 돌아가려면 Enter를 누르세요: ");
 				scanner.nextLine();
-				
+
 				// 다시 로그인 화면으로 돌아가기 위해 continue
 				continue;
 			}

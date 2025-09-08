@@ -15,7 +15,7 @@ import domain.enums.RequestStatus;
 import dto.PropertyCreateRequest;
 import dto.PropertyUpdateRequest;
 import repository.UserRepository;
-import service.IContractService;
+import service.IContractRequestService;
 import service.IPropertyService;
 import view.ui.UIHelper;
 
@@ -23,11 +23,11 @@ public class LessorView {
 	private final Scanner scanner;
 	private final User lessor;
 	private final IPropertyService propertyService;
-	private final IContractService contractService;
+	private final IContractRequestService contractService;
 	private final UserRepository userRepository;
 
 	public LessorView(Scanner scanner, User lessor, IPropertyService propertyService,
-		IContractService contractService, UserRepository userRepository) {
+		IContractRequestService contractService, UserRepository userRepository) {
 		this.scanner = scanner;
 		this.lessor = lessor;
 		this.propertyService = propertyService;
@@ -142,7 +142,7 @@ public class LessorView {
 			propertyType,
 			dealType
 		);
-		
+
 		try {
 			propertyService.createProperty(lessor, request);
 		} catch (Exception e) {
@@ -386,7 +386,7 @@ public class LessorView {
 					statusText = "알 수 없음";
 					break;
 			}
-			
+
 			content.append(String.format("%d. %s %s %s %s %s\n",
 				(i + 1),
 				property.getLocation().getCity() + " " + property.getLocation().getDistrict(),
@@ -585,7 +585,8 @@ public class LessorView {
 		}
 
 		try {
-			propertyService.updateProperty(lessor, property.getId(), new PropertyUpdateRequest(null, newPrice.getDeposit(), newPrice.getMonthlyRent()));
+			propertyService.updateProperty(lessor, property.getId(),
+				new PropertyUpdateRequest(null, newPrice.getDeposit(), newPrice.getMonthlyRent()));
 		} catch (Exception e) {
 			System.out.println("❌ 가격 변경 중 오류가 발생했습니다: " + e.getMessage());
 			System.out.print("계속하려면 Enter를 누르세요: ");
@@ -719,7 +720,8 @@ public class LessorView {
 		}
 
 		try {
-			propertyService.updateProperty(lessor, property.getId(), new dto.PropertyUpdateRequest(newDealType, newPrice.getDeposit(), newPrice.getMonthlyRent()));
+			propertyService.updateProperty(lessor, property.getId(),
+				new dto.PropertyUpdateRequest(newDealType, newPrice.getDeposit(), newPrice.getMonthlyRent()));
 		} catch (Exception e) {
 			System.out.println("❌ 거래 유형 및 가격 변경 중 오류가 발생했습니다: " + e.getMessage());
 			System.out.print("계속하려면 Enter를 누르세요: ");
@@ -975,17 +977,17 @@ public class LessorView {
 		}
 	}
 
-	    // 계약요청 상세보기
-    private void showContractRequestDetail(ContractRequest request) {
-        // 디버그: 실제 요청 상태 확인
-        System.out.println("DEBUG: Request Status = " + request.getStatus());
-        System.out.println("DEBUG: Is APPROVED? = " + (request.getStatus() == RequestStatus.APPROVED));
-        System.out.println("DEBUG: RequestStatus.APPROVED = " + RequestStatus.APPROVED);
-        
-        UIHelper.clearScreen();
-        UIHelper.printHeader("부동산 플랫폼");
+	// 계약요청 상세보기
+	private void showContractRequestDetail(ContractRequest request) {
+		// 디버그: 실제 요청 상태 확인
+		System.out.println("DEBUG: Request Status = " + request.getStatus());
+		System.out.println("DEBUG: Is APPROVED? = " + (request.getStatus() == RequestStatus.APPROVED));
+		System.out.println("DEBUG: RequestStatus.APPROVED = " + RequestStatus.APPROVED);
 
-        Property property = propertyService.findPropertyById(request.getPropertyId());
+		UIHelper.clearScreen();
+		UIHelper.printHeader("부동산 플랫폼");
+
+		Property property = propertyService.findPropertyById(request.getPropertyId());
 
 		String statusEmoji = "";
 		switch (request.getStatus()) {
