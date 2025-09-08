@@ -169,7 +169,7 @@ public class PropertyRepository {
 
 	// 소유자 ID로 매물 조회
 	public List<Property> findByOwnerId(Long ownerId) {
-		String sql = "SELECT * FROM properties WHERE owner_id = ?";
+		    String sql = "SELECT * FROM properties WHERE owner_id = ? AND deleted_at IS NULL";
 		List<Property> properties = new ArrayList<>();
 		try (Connection conn = DBConnectionManager.getConnection();
 			 PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -185,7 +185,7 @@ public class PropertyRepository {
 	}
 
 	public void deleteById(Long id) {
-		String sql = "DELETE FROM properties WHERE id = ?";
+		String sql = "UPDATE properties SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?";
 		try (Connection conn = DBConnectionManager.getConnection();
 			 PreparedStatement stmt = conn.prepareStatement(sql)) {
 			stmt.setLong(1, id);
