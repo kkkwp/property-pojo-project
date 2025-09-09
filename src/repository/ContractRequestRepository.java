@@ -89,7 +89,7 @@ public class ContractRequestRepository {
 	}
 
 	// 특정 매물 소유자의 매물에 대한 모든 요청 목록 조회
-	public List<ContractRequest> findAllByPropertyOwnerId(Long ownerId, PropertyRepository propertyRepository) {
+	public List<ContractRequest> findAllByPropertyOwnerId(Long ownerId) {
 		String sql = "SELECT cr.* FROM contract_requests cr " +
 			"JOIN properties p ON cr.property_id = p.id " +
 			"WHERE p.owner_id = ?";

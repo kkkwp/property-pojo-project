@@ -33,7 +33,7 @@ public class ContractRequestService implements IContractRequestService {
 
 	@Override
 	public List<ContractRequest> findContractRequestsByPropertyOwnerId(Long ownerId) {
-		return requestRepository.findAllByPropertyOwnerId(ownerId, propertyRepository);
+		return requestRepository.findAllByPropertyOwnerId(ownerId);
 	}
 
 	@Override
