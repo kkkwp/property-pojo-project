@@ -8,6 +8,7 @@ import domain.enums.Role;
 import repository.UserRepository;
 import service.IAuthService;
 import service.IContractRequestService;
+import service.IContractService;
 import service.IPropertyService;
 import view.ui.UIHelper;
 
@@ -15,14 +16,16 @@ public class MainView {
 	private final Scanner scanner;
 	private final IAuthService authService;
 	private final IPropertyService propertyService;
-	private final IContractRequestService contractService;
+	private final IContractRequestService requestService;
+	private final IContractService contractService;
 	private final UserRepository userRepository;
 
-	public MainView(IAuthService authService, IPropertyService propertyService, IContractRequestService contractService,
-		UserRepository userRepository) {
+	public MainView(IAuthService authService, IPropertyService propertyService, IContractRequestService requestService,
+		IContractService contractService, UserRepository userRepository) {
 		this.scanner = new Scanner(System.in);
 		this.authService = authService;
 		this.propertyService = propertyService;
+		this.requestService = requestService;
 		this.contractService = contractService;
 		this.userRepository = userRepository;
 	}
@@ -59,11 +62,12 @@ public class MainView {
 
 					// 사용자 역할에 따라 다른 메뉴 표시
 					if (user.getRole() == Role.LESSOR) {
-						LessorView lessorView = new LessorView(scanner, user, propertyService, contractService,
+						LessorView lessorView = new LessorView(scanner, user, propertyService, requestService,
 							userRepository);
 						lessorView.showMenu();
 					} else if (user.getRole() == Role.LESSEE) {
-						LesseeView lesseeView = new LesseeView(scanner, user, propertyService, contractService);
+						LesseeView lesseeView = new LesseeView(scanner, user, propertyService, requestService,
+							contractService);
 						lesseeView.showMenu();
 					}
 

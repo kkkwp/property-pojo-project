@@ -35,12 +35,4 @@ public interface IContractRequestService {
 	 * @return 상태가 '거절'로 업데이트된 요청
 	 */
 	ContractRequest rejectRequest(User lessor, Long requestId);
-
-	/**
-	 * 계약을 완료합니다.
-	 * @param lessee 임차인
-	 * @param requestId 완료할 요청 ID
-	 * @return 상태가 '완료'로 업데이트된 요청
-	 */
-	ContractRequest completeContract(User lessee, Long requestId);
 }

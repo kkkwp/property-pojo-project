@@ -9,8 +9,10 @@ import domain.Property;
 import domain.User;
 import domain.enums.DealType;
 import domain.enums.PropertyType;
+import domain.enums.RequestStatus;
 import dto.PropertyFilter;
 import service.IContractRequestService;
+import service.IContractService;
 import service.IPropertyService;
 import view.ui.UIHelper;
 
@@ -18,13 +20,15 @@ public class LesseeView {
 	private final Scanner scanner;
 	private final User lessee;
 	private final IPropertyService propertyService;
-	private final IContractRequestService contractService;
+	private final IContractRequestService requestService;
+	private final IContractService contractService;
 
 	public LesseeView(Scanner scanner, User lessee, IPropertyService propertyService,
-		IContractRequestService contractService) {
+		IContractRequestService requestService, IContractService contractService) {
 		this.scanner = scanner;
 		this.lessee = lessee;
 		this.propertyService = propertyService;
+		this.requestService = requestService;
 		this.contractService = contractService;
 	}
 
@@ -585,7 +589,7 @@ public class LesseeView {
 
 		if (confirmChoice.equals("y")) {
 			for (Property property : selectedProperties)
-				contractService.createRequest(lessee, property.getId());
+				requestService.createRequest(lessee, property.getId());
 
 			UIHelper.clearScreen();
 			UIHelper.printHeader("부동산 플랫폼");
@@ -623,7 +627,7 @@ public class LesseeView {
 		UIHelper.clearScreen();
 		UIHelper.printHeader("부동산 플랫폼");
 
-		List<ContractRequest> myRequests = contractService.findContractRequestsByUserId(lessee.getId())
+		List<ContractRequest> myRequests = requestService.findContractRequestsByUserId(lessee.getId())
 			.stream()
 			.filter(request -> request.getStatus() != domain.enums.RequestStatus.COMPLETED)
 			.toList();
@@ -785,7 +789,7 @@ public class LesseeView {
 	// 임대인에게 연락하기 (애니메이션 + 상태 변경)
 	private void contactLessor(ContractRequest request, Property property) {
 		// 계약 요청 상태 확인
-		if (request.getStatus() != domain.enums.RequestStatus.APPROVED) {
+		if (request.getStatus() != RequestStatus.APPROVED) {
 			UIHelper.clearScreen();
 			UIHelper.printHeader("부동산 플랫폼");
 
@@ -810,7 +814,7 @@ public class LesseeView {
 
 		// 계약 완료 처리
 		try {
-			contractService.completeContract(lessee, request.getId());
+			contractService.completeContract(request.getId());
 		} catch (Exception e) {
 			UIHelper.clearScreen();
 			UIHelper.printHeader("부동산 플랫폼");
@@ -896,7 +900,7 @@ public class LesseeView {
 		UIHelper.clearScreen();
 		UIHelper.printHeader("부동산 플랫폼");
 
-		List<ContractRequest> myRequests = contractService.findContractRequestsByUserId(lessee.getId());
+		List<ContractRequest> myRequests = requestService.findContractRequestsByUserId(lessee.getId());
 		List<ContractRequest> completedRequests = myRequests.stream()
 			.filter(request -> request.getStatus() == domain.enums.RequestStatus.COMPLETED)
 			.toList();

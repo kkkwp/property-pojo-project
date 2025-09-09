@@ -12,10 +12,10 @@ import domain.Contract;
 
 public class ContractRepository {
 	public Contract save(Contract contract) {
-		if (contract.getId() == null) {
-			return insert(contract);
-		} else {
+		if (findById(contract.getId()).isPresent()) {
 			return update(contract);
+		} else {
+			return insert(contract);
 		}
 	}
 
@@ -32,7 +32,7 @@ public class ContractRepository {
 			stmt.executeUpdate();
 			return contract;
 		} catch (SQLException e) {
-			throw new RuntimeException("계약 정보 저장에 실패했습니다.");
+			throw new RuntimeException("계약 정보 저장(insert)에 실패했습니다.", e);
 		}
 	}
 
@@ -46,7 +46,7 @@ public class ContractRepository {
 			stmt.executeUpdate();
 			return contract;
 		} catch (SQLException e) {
-			throw new RuntimeException("계약 정보 수정에 실패했습니다.");
+			throw new RuntimeException("계약 정보 수정(update)에 실패했습니다.", e);
 		}
 	}
 

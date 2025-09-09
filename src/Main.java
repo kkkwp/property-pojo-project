@@ -1,10 +1,13 @@
+import repository.ContractRepository;
 import repository.ContractRequestRepository;
 import repository.PropertyRepository;
 import repository.UserRepository;
 import service.AuthService;
 import service.ContractRequestService;
+import service.ContractService;
 import service.IAuthService;
 import service.IContractRequestService;
+import service.IContractService;
 import service.IPropertyService;
 import service.PropertyService;
 import validator.AuthValidator;
@@ -30,6 +33,7 @@ public class Main {
 		UserRepository userRepository = new UserRepository();
 		PropertyRepository propertyRepository = new PropertyRepository();
 		ContractRequestRepository contractRequestRepository = new ContractRequestRepository();
+		ContractRepository contractRepository = new ContractRepository();
 
 		// Validator 생성
 		AuthValidator authValidator = new AuthValidator();
@@ -39,12 +43,13 @@ public class Main {
 		// Service 생성
 		IAuthService authService = new AuthService(userRepository, authValidator);
 		IPropertyService propertyService = new PropertyService(propertyRepository, userRepository, propertyValidator);
-		IContractRequestService contractService = new ContractRequestService(contractRequestRepository,
-			propertyRepository,
-			contractValidator);
+		IContractRequestService requestService = new ContractRequestService(contractRequestRepository,
+			propertyRepository, contractValidator);
+		IContractService contractService = new ContractService(contractRepository, contractRequestRepository,
+			propertyRepository, contractValidator);
 
 		// 메인 뷰 시작
-		MainView mainView = new MainView(authService, propertyService, contractService, userRepository);
+		MainView mainView = new MainView(authService, propertyService, requestService, contractService, userRepository);
 		mainView.start();
 	}
 }
