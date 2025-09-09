@@ -4,23 +4,44 @@ SET CHARACTER SET utf8mb4;
 
 USE stigma;
 
-INSERT INTO users (email, role, phone_number, address)
+INSERT IGNORE INTO users (email, role, phone_number, address)
 VALUES ('lessor@test', 'LESSOR', '010-1111-2222', '서울특별시 강남구 테헤란로 123'),
        ('lessee@test', 'LESSEE', '010-3333-4444', '서울특별시 서초구 서초대로 456');
 
-INSERT INTO properties (owner_id, city, district, deposit, monthly_rent, property_type, deal_type, status)
-VALUES # 임대인 ID 1번의 매물들 (서울)
-       (1, '서울특별시', '강남구', 50000000, 0, 'APARTMENT', 'JEONSE', 'AVAILABLE'),
-       (1, '서울특별시', '서초구', 10000000, 800000, 'VILLA', 'MONTHLY', 'AVAILABLE'),
-       (1, '서울특별시', '마포구', 300000000, 0, 'OFFICETEL', 'SALE', 'AVAILABLE'),
-       # 임대인 ID 1번의 매물들 (경기도)
-       (1, '경기도', '수원시', 30000000, 500000, 'APARTMENT', 'MONTHLY', 'AVAILABLE'),
-       (1, '경기도', '성남시', 40000000, 0, 'VILLA', 'JEONSE', 'AVAILABLE'),
-       # 임대인 ID 1번의 원룸 매물들
-       (1, '서울특별시', '종로구', 15000000, 400000, 'ONE_ROOM', 'MONTHLY', 'AVAILABLE'),
-       (1, '서울특별시', '중구', 20000000, 0, 'ONE_ROOM', 'JEONSE', 'AVAILABLE'),
-       # 고가 매물들
-       (1, '서울특별시', '강남구', 1000000000, 0, 'VILLA', 'SALE', 'AVAILABLE'),
-       # 저가 매물들
-       (1, '경기도', '의정부시', 5000000, 300000, 'ONE_ROOM', 'MONTHLY', 'AVAILABLE');
+-- 테스트 매물들이 이미 존재하는지 확인하고 없을 때만 삽입
+INSERT IGNORE INTO properties (owner_id, city, district, deposit, monthly_rent, property_type, deal_type, status)
+SELECT 1, '서울특별시', '강남구', 50000000, 0, 'APARTMENT', 'JEONSE', 'AVAILABLE'
+WHERE NOT EXISTS (SELECT 1 FROM properties WHERE owner_id = 1 AND city = '서울특별시' AND district = '강남구' AND property_type = 'APARTMENT' AND deal_type = 'JEONSE');
+
+INSERT IGNORE INTO properties (owner_id, city, district, deposit, monthly_rent, property_type, deal_type, status)
+SELECT 1, '서울특별시', '서초구', 10000000, 800000, 'VILLA', 'MONTHLY', 'AVAILABLE'
+WHERE NOT EXISTS (SELECT 1 FROM properties WHERE owner_id = 1 AND city = '서울특별시' AND district = '서초구' AND property_type = 'VILLA' AND deal_type = 'MONTHLY');
+
+INSERT IGNORE INTO properties (owner_id, city, district, deposit, monthly_rent, property_type, deal_type, status)
+SELECT 1, '서울특별시', '마포구', 300000000, 0, 'OFFICETEL', 'SALE', 'AVAILABLE'
+WHERE NOT EXISTS (SELECT 1 FROM properties WHERE owner_id = 1 AND city = '서울특별시' AND district = '마포구' AND property_type = 'OFFICETEL' AND deal_type = 'SALE');
+
+INSERT IGNORE INTO properties (owner_id, city, district, deposit, monthly_rent, property_type, deal_type, status)
+SELECT 1, '경기도', '수원시', 30000000, 500000, 'APARTMENT', 'MONTHLY', 'AVAILABLE'
+WHERE NOT EXISTS (SELECT 1 FROM properties WHERE owner_id = 1 AND city = '경기도' AND district = '수원시' AND property_type = 'APARTMENT' AND deal_type = 'MONTHLY');
+
+INSERT IGNORE INTO properties (owner_id, city, district, deposit, monthly_rent, property_type, deal_type, status)
+SELECT 1, '경기도', '성남시', 40000000, 0, 'VILLA', 'JEONSE', 'AVAILABLE'
+WHERE NOT EXISTS (SELECT 1 FROM properties WHERE owner_id = 1 AND city = '경기도' AND district = '성남시' AND property_type = 'VILLA' AND deal_type = 'JEONSE');
+
+INSERT IGNORE INTO properties (owner_id, city, district, deposit, monthly_rent, property_type, deal_type, status)
+SELECT 1, '서울특별시', '종로구', 15000000, 400000, 'ONE_ROOM', 'MONTHLY', 'AVAILABLE'
+WHERE NOT EXISTS (SELECT 1 FROM properties WHERE owner_id = 1 AND city = '서울특별시' AND district = '종로구' AND property_type = 'ONE_ROOM' AND deal_type = 'MONTHLY');
+
+INSERT IGNORE INTO properties (owner_id, city, district, deposit, monthly_rent, property_type, deal_type, status)
+SELECT 1, '서울특별시', '중구', 20000000, 0, 'ONE_ROOM', 'JEONSE', 'AVAILABLE'
+WHERE NOT EXISTS (SELECT 1 FROM properties WHERE owner_id = 1 AND city = '서울특별시' AND district = '중구' AND property_type = 'ONE_ROOM' AND deal_type = 'JEONSE');
+
+INSERT IGNORE INTO properties (owner_id, city, district, deposit, monthly_rent, property_type, deal_type, status)
+SELECT 1, '서울특별시', '강남구', 1000000000, 0, 'VILLA', 'SALE', 'AVAILABLE'
+WHERE NOT EXISTS (SELECT 1 FROM properties WHERE owner_id = 1 AND city = '서울특별시' AND district = '강남구' AND property_type = 'VILLA' AND deal_type = 'SALE');
+
+INSERT IGNORE INTO properties (owner_id, city, district, deposit, monthly_rent, property_type, deal_type, status)
+SELECT 1, '경기도', '의정부시', 5000000, 300000, 'ONE_ROOM', 'MONTHLY', 'AVAILABLE'
+WHERE NOT EXISTS (SELECT 1 FROM properties WHERE owner_id = 1 AND city = '경기도' AND district = '의정부시' AND property_type = 'ONE_ROOM' AND deal_type = 'MONTHLY');
 
