@@ -195,6 +195,22 @@ public class PropertyRepository {
 		}
 	}
 
+	/**
+	 * 매물 상태를 IN_CONTRACT에서 COMPLETED로 원자적으로 변경
+	 * @param propertyId 매물 ID
+	 * @return 업데이트된 행의 수 (1이면 성공, 0이면 이미 COMPLETED 상태)
+	 */
+	public int updateStatusToCompleted(Long propertyId) {
+		String sql = "UPDATE properties SET status = 'COMPLETED' WHERE id = ? AND status = 'IN_CONTRACT'";
+		try (Connection conn = DBConnectionManager.getConnection();
+			 PreparedStatement stmt = conn.prepareStatement(sql)) {
+			stmt.setLong(1, propertyId);
+			return stmt.executeUpdate();
+		} catch (SQLException e) {
+			throw new RuntimeException("매물 상태 변경에 실패했습니다.");
+		}
+	}
+
 	private Property mapProperty(ResultSet rs) throws SQLException {
 		// DB 조회 결과를 Property 객체로 변환
 		Location location = new Location(rs.getString("city"), rs.getString("district"));

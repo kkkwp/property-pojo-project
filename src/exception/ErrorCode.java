@@ -15,7 +15,8 @@ public enum ErrorCode {
 
 	// 계약 관련
 	REQUEST_NOT_FOUND(404, "존재하지 않는 계약 요청입니다."),
-	INVALID_REQUEST_STATUS(400, "처리할 수 없는 요청 상태입니다.");
+	INVALID_REQUEST_STATUS(400, "처리할 수 없는 요청 상태입니다."),
+	PROPERTY_ALREADY_CONTRACTED(409, "이미 계약이 완료된 매물입니다.");
 
 	public final int status;
 	public final String message;

@@ -818,9 +818,29 @@ public class LesseeView {
 		} catch (Exception e) {
 			UIHelper.clearScreen();
 			UIHelper.printHeader("부동산 플랫폼");
-			System.out.println("❌ 계약 완료 처리 중 오류가 발생했습니다: " + e.getMessage());
-			System.out.print("계속하려면 Enter를 누르세요: ");
-			scanner.nextLine();
+			
+			StringBuilder errorContent = new StringBuilder();
+			errorContent.append("❌ 계약 완료 처리 중 오류가 발생했습니다!\n\n");
+			
+			// 특정 에러 메시지 처리
+			if (e.getMessage().contains("이미 계약이 완료된 매물")) {
+				errorContent.append("🚫 다른 임차인이 먼저 계약을 완료했습니다.\n");
+				errorContent.append("💡 이 매물은 더 이상 계약할 수 없습니다.\n");
+				errorContent.append("📞 다른 매물을 찾아보시기 바랍니다.\n");
+			} else {
+				errorContent.append("⚠️  오류 내용: " + e.getMessage() + "\n");
+				errorContent.append("💡 잠시 후 다시 시도해주세요.\n");
+			}
+			
+			errorContent.append("\n0: 이전 화면으로 돌아가기");
+			
+			UIHelper.printBox(lessee.getEmail(), "계약 실패", errorContent.toString());
+			System.out.print("\u001B[33m선택: \u001B[0m");
+			
+			String choice = scanner.nextLine().trim();
+			if (choice.equals("0")) {
+				showContractRequestDetail(request);
+			}
 			return;
 		}
 
