@@ -856,7 +856,7 @@ public class LesseeView {
 			System.out.print("\r" + leftSpaces + leftSide + " 📞 전화 연결 중 " + rightSide + rightSpaces);
 
 			try {
-				Thread.sleep(350); // 0.35초 대기
+				Thread.sleep(1000); // 0.35초 대기
 			} catch (InterruptedException e) {
 				Thread.currentThread().interrupt();
 			}
