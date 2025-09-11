@@ -1,14 +1,22 @@
 services:
+  init-db:
+    image: java-project-app
+    command: ["/bin/sh", "-c", "cp -r /app/resources/sql/. /sql-temp/"]
+    volumes:
+      - sql-scripts:/sql-temp
   db:
     image: mysql:8.0
     container_name: java-project-db
+    depends_on:
+      init-db:
+        condition: service_completed_successfully
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
     volumes:
       - db-data:/var/lib/mysql
       # 컨테이너가 처음 생성될 때 아래 경로의 .sql 파일들을 실행하여 DB를 초기화
-      - ./resources/sql:/docker-entrypoint-initdb.d
+      - sql-scripts:/docker-entrypoint-initdb.d
     ports:
       - "3306:3306"
     healthcheck:
@@ -18,7 +26,7 @@ services:
       retries: 5
 
   app:
-    build: .
+    image: java-project-app
     container_name: java-project-app
     depends_on:
       db:
@@ -32,3 +40,4 @@ services:
 
 volumes:
   db-data:
+  sql-scripts:
