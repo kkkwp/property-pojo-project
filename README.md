@@ -104,4 +104,4 @@ src/
 
 ## 🔵 프로젝트 문서
 
-프로젝트 관련 기획 문서, 다이어그램 등은 [WIKI](https://github.com/stigma-property/java-project/wiki)를 참조해주세요!
+프로젝트 관련 기획 문서, 다이어그램 등은 [WIKI](https://github.com/kkkwp/property-pojo-project/wiki)를 참조해주세요!
