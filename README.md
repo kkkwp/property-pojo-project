@@ -25,7 +25,8 @@
 
 ### 1. Git Clone
 ```shell
-git clone https://github.com/stigma-property/java-project.git
+git clone https://github.com/kkkwp/property-pojo-project.git
+cd property-pojo-project
 ```
 
 ### 2. 최상위 디렉토리에 `.env` 파일 생성
